@@ -1,0 +1,122 @@
+<!-- Viewer scene. Meshes are coloured parts of the Sesame STEP tessellation. -->
+<mujoco model="scene_viewer_sesame">
+  <compiler angle="radian" meshdir="parts"/>
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="160" elevation="-20" offwidth="1600" offheight="1200"/>
+  </visual>
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+    <mesh name="part_00" inertia="shell" file="part_00.stl"/>
+    <mesh name="part_01" inertia="shell" file="part_01.stl"/>
+    <mesh name="part_02" inertia="shell" file="part_02.stl"/>
+    <mesh name="part_03" inertia="shell" file="part_03.stl"/>
+    <mesh name="part_04" inertia="shell" file="part_04.stl"/>
+    <mesh name="part_05" inertia="shell" file="part_05.stl"/>
+    <mesh name="part_06" inertia="shell" file="part_06.stl"/>
+    <mesh name="part_07" inertia="shell" file="part_07.stl"/>
+    <mesh name="part_08" inertia="shell" file="part_08.stl"/>
+    <mesh name="part_09" inertia="shell" file="part_09.stl"/>
+    <mesh name="part_10" inertia="shell" file="part_10.stl"/>
+    <mesh name="part_11" inertia="shell" file="part_11.stl"/>
+    <mesh name="part_12" inertia="shell" file="part_12.stl"/>
+    <mesh name="part_13" inertia="shell" file="part_13.stl"/>
+    <mesh name="part_14" inertia="shell" file="part_14.stl"/>
+    <mesh name="part_15" inertia="shell" file="part_15.stl"/>
+    <mesh name="part_16" inertia="shell" file="part_16.stl"/>
+    <mesh name="part_17" inertia="shell" file="part_17.stl"/>
+    <mesh name="part_18" inertia="shell" file="part_18.stl"/>
+    <mesh name="part_19" inertia="shell" file="part_19.stl"/>
+    <mesh name="part_20" inertia="shell" file="part_20.stl"/>
+    <mesh name="part_21" inertia="shell" file="part_21.stl"/>
+    <mesh name="part_22" inertia="shell" file="part_22.stl"/>
+    <mesh name="part_23" inertia="shell" file="part_23.stl"/>
+    <mesh name="part_24" inertia="shell" file="part_24.stl"/>
+    <mesh name="part_25" inertia="shell" file="part_25.stl"/>
+    <mesh name="part_26" inertia="shell" file="part_26.stl"/>
+    <mesh name="part_27" inertia="shell" file="part_27.stl"/>
+    <mesh name="part_28" inertia="shell" file="part_28.stl"/>
+    <mesh name="part_29" inertia="shell" file="part_29.stl"/>
+    <mesh name="part_30" inertia="shell" file="part_30.stl"/>
+    <mesh name="part_31" inertia="shell" file="part_31.stl"/>
+    <mesh name="part_32" inertia="shell" file="part_32.stl"/>
+    <mesh name="part_33" inertia="shell" file="part_33.stl"/>
+    <mesh name="part_34" inertia="shell" file="part_34.stl"/>
+    <mesh name="part_35" inertia="shell" file="part_35.stl"/>
+    <mesh name="part_36" inertia="shell" file="part_36.stl"/>
+    <mesh name="part_37" inertia="shell" file="part_37.stl"/>
+    <mesh name="part_38" inertia="shell" file="part_38.stl"/>
+    <mesh name="part_39" inertia="shell" file="part_39.stl"/>
+    <mesh name="part_40" inertia="shell" file="part_40.stl"/>
+    <mesh name="part_41" inertia="shell" file="part_41.stl"/>
+    <mesh name="part_42" inertia="shell" file="part_42.stl"/>
+    <mesh name="part_43" inertia="shell" file="part_43.stl"/>
+    <mesh name="part_44" inertia="shell" file="part_44.stl"/>
+    <mesh name="part_45" inertia="shell" file="part_45.stl"/>
+    <mesh name="part_46" inertia="shell" file="part_46.stl"/>
+    <mesh name="part_47" inertia="shell" file="part_47.stl"/>
+    <mesh name="part_48" inertia="shell" file="part_48.stl"/>
+    <mesh name="part_49" inertia="shell" file="part_49.stl"/>
+    <mesh name="part_50" inertia="shell" file="part_50.stl"/>
+  </asset>
+  <worldbody>
+    <light pos="0 0 3.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+    <body name="sesame" pos="-0.0256 0.0024 0.0318" quat="0.707106781187 0.707106781187 0 0">
+      <geom type="mesh" mesh="part_00" rgba="0.6275 0.6275 0.6275 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_01" rgba="0.4745 0.4745 0.4745 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_02" rgba="1.0000 1.0000 1.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_03" rgba="1.0000 0.4745 0.0745 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_04" rgba="0.2510 0.2510 0.2510 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_05" rgba="0.6471 0.5176 0.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_06" rgba="0.9647 0.9647 0.9529 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_07" rgba="0.1569 0.1569 0.1569 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_08" rgba="0.7765 0.7569 0.7373 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_09" rgba="0.9529 0.7961 0.4863 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_10" rgba="0.7490 0.7490 0.7490 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_11" rgba="0.1725 0.1725 0.1725 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_12" rgba="0.0392 0.0392 0.0392 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_13" rgba="0.7529 0.7529 0.7529 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_14" rgba="0.8000 0.8000 0.8000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_15" rgba="0.4902 0.1922 0.5922 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_16" rgba="0.6902 0.6118 0.5294 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_17" rgba="1.0000 1.0000 0.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_18" rgba="0.6431 0.6157 0.6000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_19" rgba="0.7961 0.8235 0.9373 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_20" rgba="0.9098 0.9098 0.9098 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_21" rgba="0.1412 0.1412 0.1412 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_22" rgba="0.9098 0.5725 0.1647 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_23" rgba="0.3098 0.3098 0.3098 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_24" rgba="0.8980 0.9176 0.9294 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_25" rgba="0.0941 0.0941 0.0941 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_26" rgba="0.0039 0.1686 0.5765 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_27" rgba="0.8157 0.8157 0.8157 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_28" rgba="0.7686 0.7686 0.7686 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_29" rgba="0.6392 0.6667 0.6784 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_30" rgba="1.0000 0.5490 0.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_31" rgba="1.0000 0.0000 0.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_32" rgba="0.5490 0.3608 0.0314 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_33" rgba="0.2980 0.2980 0.2980 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_34" rgba="0.6510 0.4863 0.0196 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_35" rgba="0.0000 0.0000 1.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_36" rgba="0.0824 0.0824 0.0824 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_37" rgba="0.0980 0.0980 0.0980 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_38" rgba="0.6471 0.6196 0.5882 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_39" rgba="0.8000 0.8980 1.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_40" rgba="0.9569 0.8980 0.6549 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_41" rgba="0.7020 0.7020 0.7020 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_42" rgba="0.7922 0.8196 0.9333 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_43" rgba="0.6588 0.5098 0.0588 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_44" rgba="0.2000 0.2000 0.2000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_45" rgba="1.0000 0.9216 0.7804 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_46" rgba="1.0000 0.5020 0.0000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_47" rgba="0.3490 0.5843 0.8549 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_48" rgba="0.6196 0.4078 0.2000 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_49" rgba="0.0078 0.2392 0.8235 1" contype="0" conaffinity="0" group="1"/>
+      <geom type="mesh" mesh="part_50" rgba="0.0000 0.0000 0.0000 1" contype="0" conaffinity="0" group="1"/>
+    </body>
+  </worldbody>
+</mujoco>

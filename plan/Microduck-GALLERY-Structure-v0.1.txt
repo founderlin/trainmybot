@@ -1,0 +1,309 @@
+MICRODUCK — GALLERY 页面结构与交互设计 v0.1
+2026-09-26｜Policy showcase · Recordings · Files · Provenance
+
+文档定位
+GALLERY 以橱窗展示机器人动作成果，保留本产品 Notion 式浅色、Avenir Next 字体与统一字阶。
+只参考官方 microduck-policy-playground 的媒体优先和卡片排列，不复制配色/字体/字号，不加入其真实机器人遥控流程。
+本轮是设计规格，不包含网站代码、真实播放测试或可交互原型。
+说明用中文；全部网站文案用英文；布局稿允许临时使用 Inter Tight。
+配套：Microduck-Website-Plan-v0.2.txt、Microduck-SANDBOX-Structure-v0.1.txt、Microduck-ARENA-Structure-v0.3.txt。
+
+一、设计原则与参考边界
+
+GALLERY 回答：动作表现如何、成果来自哪里、适用于什么Bot、哪些文件可下载。
+默认私有，不因名称为GALLERY就成为公共社区。
+以一项策略成果为卡片，而不是给ONNX、视频、参数分别做三张孤立文件卡。
+同策略多个版本默认折叠成一张主卡；版本选择在详情，必要时可切换Show all versions。
+策略优劣不能仅靠视频判断；兼容检查、仿真评估、真机验证独立呈现。
+
+官方playground源码核对：
+• 页面max-width 1040px、居中，grid采用repeat(auto-fill,minmax(250px,1fr))、gap14px。
+• 视频width100%、16:9、object-fit:cover；只有存在视频字段的条目才生成视频。
+• 上部还有机器人控制与已加载动作区域，并不是可换色/换脚的MuJoCo Viewer。
+• 官方合集分支未给全部policy附视频，不能据此假定十个动作都有官方演示视频。
+本次仅静态读取源码，未做浏览器视觉核验。
+
+借鉴：内容自适应网格、媒体在上、策略信息和动作入口在下。
+不复制：黄色按钮、深色媒体底、原字体与字号、真实机器人登录/控制、无条件cover裁剪。
+本产品按自身侧栏和1160px内容区设计，不能把1040px网页整块缩小嵌入。
+
+二、统一视觉与卡片网格
+
+Page #FFFFFF；Sidebar #F7F7F5；Text #37352F；Muted #73716A；Divider #E9E9E7；Hover #EFEFED。
+Avenir Next；布局稿Inter Tight。Title32 / Section18 / Body14 / Property13 / Helper≥12px；数字Regular。
+卡片圆角8px，1px细边；无厚投影、渐变或营销徽章。
+卡片hover仅浅灰、轻边框，不整体缩放或抖动；播放由用户主动触发。
+
+1440px：侧栏216、内容两侧32、可用1160；3列、gap20、每卡约373px。
+1280px：可用1000，仍可3列约320px；小于三列最小可读宽度时变2列。
+最小卡宽建议280px，手机单列；不通过把字体缩到12px以下维持列数。
+列表延迟加载封面，视频preload=metadata；不让所有卡片同时自动播放占满资源。
+
+三、GALLERY 首页 — Policies
+
+┌─────────────┬─────────────────────────────────────────────────────────────┐
+│ Microduck   │ GALLERY                                    Credits Account  │
+│             ├─────────────────────────────────────────────────────────────┤
+│ SANDBOX     │ Policies                                 Open Arena         │
+│ ARENA       │ Review your trained moves and their files.                  │
+│ GALLERY     │ My policies   Official references                          │
+│             │ Search policies   Bot   Action   Feet   Evaluation   Sort    │
+│             │                                                             │
+│             │ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐  │
+│             │ │ Video preview  │ │ Video preview  │ │ Model preview  │  │
+│             │ │ Play preview   │ │ Play preview   │ │ No recording   │  │
+│             │ ├────────────────┤ ├────────────────┤ ├────────────────┤  │
+│             │ │ Policy name    │ │ Policy name    │ │ Policy name    │  │
+│             │ │ Bot / Action   │ │ Bot / Action   │ │ Bot / Action   │  │
+│             │ │ Version        │ │ Version        │ │ Version        │  │
+│             │ │ Evaluation     │ │ Not evaluated  │ │ Export pending │  │
+│             │ │ Private        │ │ Private        │ │ Private        │  │
+│ MASTER      │ │ Open policy    │ │ Open policy    │ │ Open policy    │  │
+│             │ └────────────────┘ └────────────────┘ └────────────────┘  │
+└─────────────┴─────────────────────────────────────────────────────────────┘
+以上为结构示意，不是已存在的成果、评估或版本数据。
+
+3.1 首页内容
+默认My policies：用户自己的训练成果，不自动混入十个官方参考充当用户已训练结果。
+Official references：可选次级视图，展示官方目录及外部来源；与SANDBOX同一个固定版本目录，不维护第二套动作清单。
+Open Arena 为训练入口；不把“Upload任意ONNX”未经规划加入首版主操作。
+若未来支持Import policy，需要单独的契约/文件/授权检查；本版不声称已支持。
+
+搜索：Policy name、Bot name、Action category。
+筛选：Bot、Action、Feet、Evaluation、Media availability、Date。
+排序：Recently updated默认，可选Name / Created；不提供未经定义的“Best AI score”。
+筛选结果数与Clear filters可见；返回首页保持筛选和滚动位置。
+
+3.2 卡片字段
+Preview：实际视频封面/评估帧优先；没有时是明确标注的模型预览或空状态。
+Policy name：最多两行；点击名称打开详情。
+Bot：绑定来源的Bot名称与hardware revision摘要；不能用当前最新硬件覆盖历史成果。
+Action：Walking / Ground pick / Roller crouch等；以成果对应任务/metadata为准。
+Version：当前展示版本；显示Latest version不意味着Best performance。
+Evaluation：Simulation evaluated / Not evaluated / Evaluation failed；细节在详情。
+Privacy：Private文字与图标，不只靠锁图形。
+Files：紧凑显示ONNX / Parameters / Video的实际可用状态，不为不存在文件生成可点下载。
+Updated为次要信息，Source run可放详情，避免卡片堆满工程字段。
+
+官方参考卡片：显示Official reference / Source revision；无Source run和虚构训练日期/分数。
+自定义配方或改过播放设置后生成Derived policy/version，不再宣称等同未改的官方策略。
+“官方来源”不代表平台已评估、真机已测试或有商用授权。
+
+3.3 卡片点击模型
+媒体区点击Play preview，播放中原位控制；不会同时打开详情。
+Policy name / Open policy打开详情；卡片非交互空白可作为同一详情链接，但不能把video嵌进嵌套链接。
+更多菜单Download bundle / Rename / Archive，菜单事件不触发卡片导航。
+键盘Tab按标题链接、播放按钮、菜单合理排序；Enter/Space作用清晰。
+如进入另一视频，默认暂停当前视频，减少多卡并发；无自动有声播放。
+
+四、媒体选择与无黑边规则
+
+媒体优先级：
+1. 与当前policy version和checkpoint匹配的录制。
+2. 该版本的评估帧/动作封面。
+3. 精确匹配硬件版本的静态模型封面，标注Model preview / No recording。
+4. 真正空状态：No preview available，而不是借用其他版本动作视频。
+
+4.1 平台新录制
+卡片媒体基准16:9；由评估相机在录制时完整取景，头/脚/轮子/踢球道具均在画面内。
+源文件本身不得编码黑条；用真实浅色场景填满画面。
+场景比例和视频比例一致，前滚翻等动作按运动范围取景，而非只按初始站姿。
+视频元数据保存policy/checkpoint/configuration/scene/camera/seed/recorded_at。
+预览时长来自真实录制；不拿manifest的单次动作duration当整段视频时长。
+
+4.2 历史或外部视频
+禁止仅用object-fit:cover裁头裁脚来满足“无黑边”。
+比例不为16:9时，媒体容器使用视频实际宽高比，允许该卡高度不同；同一行顶部对齐，不强求底部齐平。
+如果需要统一卡高，另生成完整取景的16:9封面；详情仍按原视频比例展示，不篡改原文件。
+源文件已内嵌黑边，前端无法无损去掉且保证完整动作：标注Recording format issue，提供重新录制；不得声称CSS已解决。
+不使用模糊放大背景或重复边缘伪造“填满”。
+上述规则与ARENA真实Viewer动态渲染不同，不能混为一个固定object-fit设置。
+
+4.3 播放行为
+默认封面静止，点击播放；muted和playsInline可作为默认，用户可开启声音。
+loop仅在适合展示的短片上启用并可控制；不能自动循环造成持续干扰。
+播放控件：Play/Pause、Seek、Time、Fullscreen，必要时Playback speed；不是训练控制。
+播放失败显示Video could not play. Retry or download the recording.
+降低动态偏好时不自动播放；提供动作描述文字方便不播放的用户判断内容。
+非当前版本媒体不能默默沿用；可让用户切版本查看历史录制。
+
+4.4 MuJoCo预览选项
+如未来接入可交互Evaluation viewer，作为详情中显式选择的模式，不在每张卡上自动启动。
+采用ARENA第七节同一自适应契约，标注Evaluation only；不连接真实机器人。
+需要GPU/计费时先确认，不因点开成果详情自动收费。
+当前没有服务或契约未通过时仅提供已有视频/文件，不展示假互动模型。
+
+五、Policy details 成果详情
+
+默认完整页面，适合大幅媒体和来源追溯；可增加右侧快速信息，但不以窄抽屉替代完整详情。
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ GALLERY / Policy name                              Private    More       │
+│ Policy name                    Version selector      Download bundle     │
+│ Bot / Action / Source / Created                                         │
+├───────────────────────────────────────┬──────────────────────────────────┤
+│ Recording                             │ Compatibility                    │
+│                                       │ Hardware revision / Feet         │
+│ [Complete action preview]             │ Motor profiles / Model API       │
+│                                       │ Simulation / Hardware status     │
+│ Play / Seek / Time / Fullscreen       ├──────────────────────────────────┤
+│ Checkpoint / Scene / Recorded at      │ Provenance                       │
+│                                       │ Source run / Configuration       │
+│                                       │ Template / Runtime / Revisions   │
+├───────────────────────────────────────┴──────────────────────────────────┤
+│ Files     Parameters     Evaluation     Versions                         │
+│ Name / Type / Size / Status / Download                                   │
+│                                                                         │
+│ Open source run                         Open configuration in Sandbox    │
+└──────────────────────────────────────────────────────────────────────────┘
+
+5.1 标题与属性
+Policy name、Description、Version、Private、Created/Updated。
+Bot name、hardware revision、Configuration version、Task、Origin（Trained here / Official reference / Derived）。
+官方参考可只显示外部来源；没有Source run时不创造空链接。
+当前硬件与成果硬件不同，显示Trained for hardware revision {N}，不让用户误以为已适配新Bot。
+Rename只改显示名称，不修改文件哈希或训练来源；Description可编辑。
+
+5.2 Files
+名称 / Type / Size / Availability / Checksum（展开）/ Download。
+建议文件：
+policy.onnx：推理策略。
+manifest.json：与实际运行时兼容的策略契约。
+parameters.json或原始YAML：完整冻结训练配置与来源。
+media/preview.mp4：如果录制成功。
+evaluation.json：如果完成平台评估，注明非官方必需字段。
+training checkpoint：如用户保留，私有，显示兼容性和真实保留期。
+bundle-index.json：可选的平台文件哈希清单；不扩写成官方必需schema。
+
+操作：Download ONNX / Download parameters / Download video / Download bundle。
+有权限且文件存在才启用；Generating、Failed、Expired、Unavailable分别说明。
+Download bundle实际包含哪些文件应展示；文件部分缺失时提示Missing files而非声称“完整包”。
+下载鉴权失败引导重新登录，不能回退到公开永久URL。
+缺ONNX但已有视频的后处理记录显示Export pending/failed，不冒充可部署策略。
+
+5.3 Parameters（只读）
+显示Bot hardware、Task、Commands、Rewards、Curriculum、PPO、Randomization、Playback、Evaluation、runtime。
+并列Default / Saved value / Source / Modified，默认指当时绑定基线，不拉取当前latest。
+区分Training parameters与Policy playback parameters。
+只有manifest/ONNX的官方参考显示Training recipe unavailable或Related recipe；不能显示从未提供的完整训练参数。
+Edit in Sandbox创建派生Configuration，不直接修改已导出ONNX或原Run。
+页面可展示差异，但“改参数”不意味着权重已重新训练。
+
+5.4 Evaluation
+Simulation evaluation与Hardware validation分区显示。
+每次评估记录：policy hash、source checkpoint、scene、commands、seeds、episodes、evaluator version、时间。
+指标按Task显示；无评估器时Not evaluated，不凭视频生成评分。
+成功阈值需在评估preset中明确；不把高reward等同成功率。
+Hardware：默认Not hardware validated；若后续有真实记录，附设备、固件、日期和评估范围。
+对于训练失败后留下的可导出部分结果，标记Partial training，禁止隐去终止原因。
+
+5.5 Versions
+版本列表：Version / Source run / Configuration / Created / Change summary / Files。
+可比较参数/来源差异；指标只有相同评估设置才支持直接对比。
+同一policy名称下切换版本时，媒体、文件、兼容信息和下载目标同时切换，不混版。
+Latest是时间顺序，Best必须有明确标准；本版不默认自动挑Best。
+归档当前版本不修改历史引用；有运行依赖的checkpoint不能无提示删除。
+
+六、ONNX、manifest与续训边界
+
+ONNX导出必须保留所需observation normalizer，并通过真实输入/输出契约验证。
+manifest字段来自锁定runtime：model_api、obs_len、action_len、robot.model/hw_rev/servos/control_hz、kind、command.encoding等。
+官方HF快照共享声明model_api=1、61 observations、14 actions、50Hz，不是所有未来模型的全局常量。
+循环策略可能有额外状态张量与model_api=2，详情按文件声明展示。
+kind=episodic/perpetual/scripted与command.encoding=phase/posture_flag/constant是不同轴。
+不得把所有动作改写成generic one-shot；播放参数不兼容会影响动作，不是纯标签。
+
+Train from configuration：从冻结配置回SANDBOX建草稿，再到ARENA重新训练。
+Resume from checkpoint：只有存在完整且兼容的训练状态时才出现。
+Use as reference：官方ONNX可作参考；是否支持专家蒸馏/warm-start由特定recipe决定，不泛化为所有动作。
+仅有ONNX时显示This export can run inference, but it cannot resume training by itself.
+首版没有Deploy to robot / Remote control；不照搬playground的真实机器人控制按钮。
+
+七、从ARENA到GALLERY的状态与交互
+
+训练结束 → Evaluate（可选）→ Export ONNX → Validate contract → Record preview（可选）→ Save policy version。
+这些过程可以有不同结果：
+• ONNX/参数就绪、视频失败：成果可保存，显示No recording和Retry recording，不要求重训。
+• checkpoint就绪、ONNX失败：详情显示Export failed，能回Source run重试；不开放Download ONNX。
+• 评估失败：文件可保留，明确Evaluation failed，不用绿勾覆盖。
+• 达预算/用户停止的部分训练：允许经验证导出，标记Partial training。
+
+保存策略版本幂等，同一次导出重试不能制造多张重复卡。
+重试评估/录制若消耗GPU，事先展示资源与费用范围，确认后回ARENA查看后处理任务。
+用户的历史已结算Run费用不因重试被重新覆盖；后处理用量可追溯。
+视频替换/新增需要记录媒体revision与对应policy hash；换掉权重则必须生成新的policy version。
+
+八、空状态、异常与英文文案
+
+My policies为空：
+No policies yet. Train a saved configuration in Arena, then save the results here.
+按钮Open Arena；次级Open Sandbox。
+
+筛选无结果：
+No policies match these filters. Clear filters.
+
+无视频：
+No recording for this version.
+若可录制且有权限：Record preview；否则View files，不展示无效按钮。
+
+只有官方参考：
+Official policy reference. No training checkpoint is included.
+
+硬件版本不一致：
+This policy was trained for a different hardware revision.
+
+评估/导出/媒体失败：
+Policy saved. Preview recording failed.
+ONNX export failed. Open the source run to retry.
+Evaluation failed. Review the evaluation log.
+Video could not play. Retry or download the recording.
+
+权限/下载：
+This policy is private.
+You no longer have access to this file.
+This recording is no longer available. Check its retention status.
+
+未知状态不变成0分/0字节/0次训练；显示Not available和原因。
+
+九、响应式、性能与可访问性
+
+3列→2列→1列；媒体按实际比例适配；标题/字段可换行，不用悬停才能读到全部关键信息。
+移动端详情媒体在上，Compatibility/Provenance在下；Files表格转属性行。
+Download bundle可固定在底部安全区，但不能遮挡内容/系统返回区域。
+图片有描述文本；视频有动作描述；焦点可见；状态带文字。
+所有卡片不自动播放；键盘可完成播放、打开、筛选和下载。
+加载更多不让焦点丢失；网络慢时保留已加载卡片，不整屏闪烁。
+不同用户资产隔离；卡片封面和视频也需要权限，不能只保护ONNX下载。
+
+十、首版验收
+
+[ ] 默认橱窗而非列表；机器人动作媒体为主要视觉。
+[ ] 配色、字体、字号、侧栏、hover与SANDBOX/ARENA一致，不复制playground黄黑样式。
+[ ] My policies和Official references分开，不把参考策略冒充用户训练成果。
+[ ] 同一版本的媒体、参数、文件、评估和来源一致；切版本不会混用。
+[ ] 视频完整可见、无拉伸；平台新录制无内嵌黑条；比例不同使用真实比例布局而非粗暴cover。
+[ ] 未录制不借用其他动作视频；封面明确是Model preview。
+[ ] 点击播放不打开详情，菜单不触发导航，键盘交互清楚。
+[ ] ONNX/参数/视频/完整包下载按真实可用性开放，缺失说明明确。
+[ ] 默认Private，来源可追溯；Simulation evaluated不等于Hardware validated。
+[ ] 只有ONNX不显示直接Resume；修改参数回SANDBOX建新配置。
+[ ] Export/Recording/Evaluation各自失败可处理，不要求无谓重新训练。
+[ ] 未增加真机遥控、公开社区或未确认的收费/保留期承诺。
+本轮定义验收条件，未执行播放/布局/训练测试。
+
+十一、参考来源与固定版本
+
+布局参考：
+https://huggingface.co/spaces/pollen-robotics/microduck-policy-playground
+源码快照：
+https://huggingface.co/spaces/pollen-robotics/microduck-policy-playground/raw/11e94f2b8c68c2b73008d16b3d451367770b9cb1/index.html
+官方策略目录：
+https://huggingface.co/pollen-robotics/microduck-policies/tree/main
+固定manifest：
+https://huggingface.co/pollen-robotics/microduck-policies/resolve/1b56c396825c052a4e26e95cf2b8d8298af9e9b4/manifest.json
+运行时与契约：
+https://github.com/pollen-robotics/microduck
+训练与导出：
+https://github.com/pollen-robotics/microduck_rl
+
+官方10动作清单及数值默认值以配套SANDBOX文档为主，GALLERY不维护另一份可能漂移的参数源。

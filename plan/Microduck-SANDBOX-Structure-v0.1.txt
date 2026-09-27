@@ -1,0 +1,527 @@
+MICRODUCK — SANDBOX 页面结构与交互设计 v0.1
+2026-09-26｜Bot showcase · New bot · Motor profiles · Configuration
+
+文档定位
+SANDBOX 是 Bot 资产与训练参数的主编辑空间。首页以机器人外观橱窗呈现，已建 Bot 默认进入 Configuration。
+本文件包含页面线框、数值表单、官方十动作目录、电机参数附录和验收要求；不是网站代码或已接通后端的声明。
+说明用中文；网站界面文案全部英文。正式字体 Avenir Next；布局稿暂用已获允许的 Inter Tight。
+配套：Microduck-Website-Plan-v0.2.txt、Microduck-ARENA-Structure-v0.3.txt、Microduck-GALLERY-Structure-v0.1.txt。
+
+一、设计主张与范围
+
+保留 Notion 式浅色页面、轻量属性、细线与小圆角；把视觉重点交给 Duck 本体，而非装饰性指标卡。
+本页面不做硬件商城。Hardware 是电机和装配配置，Software 是已配置动作类别，不是软件下载商店。
+一个 Bot 可有多个 Configuration；首版一份 Configuration 对应一个训练动作/Task，一次 Run 执行一个固定版本。
+没有训练成功的配置也可以出现在 Software 中，但必须明确是 Configured，不冒充 Trained。
+
+基础色：Page #FFFFFF；Sidebar #F7F7F5；Text #37352F；Muted #73716A；Divider #E9E9E7；Hover #EFEFED。
+字阶：Title 32、Section 18、Body 14、Property 13、Helper≥12px；数字 Regular。
+1440px：侧栏216、顶部48、内容左右32；橱窗3列，间距20；卡片约373px。
+卡片/媒体圆角8px，控件4–6px；无渐变、厚阴影、毛玻璃；hover浅灰，不改变整站配色。
+
+二、SANDBOX 首页 — Bots
+
+目的：首先看见每只 Duck 的样子，然后迅速判断电机配置和动作类别。
+
+┌─────────────┬─────────────────────────────────────────────────────────────┐
+│ Microduck   │ SANDBOX                                    Credits Account  │
+│             ├─────────────────────────────────────────────────────────────┤
+│ SANDBOX     │ Bots                                             New bot    │
+│ ARENA       │ Build a bot and configure its next move.                    │
+│ GALLERY     │ Bots   Motor library                                        │
+│             │ Search bots   Feet   Motor   Action category   Sort         │
+│             │                                                             │
+│             │ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐  │
+│             │ │ Duck preview   │ │ Duck preview   │ │ Duck preview   │  │
+│             │ │ Standard feet  │ │ Roller feet    │ │ Standard feet  │  │
+│             │ ├────────────────┤ ├────────────────┤ ├────────────────┤  │
+│             │ │ Bot name       │ │ Bot name       │ │ Bot name       │  │
+│             │ │ Hardware       │ │ Hardware       │ │ Hardware       │  │
+│             │ │ XL330 profile  │ │ XL330 profile  │ │ Mixed motors   │  │
+│             │ │ Software       │ │ Software       │ │ Software       │  │
+│             │ │ Walking, Pick  │ │ Roller, Crouch │ │ Not configured │  │
+│ MASTER      │ │ Configurations │ │ Configurations │ │ Create setup   │  │
+│             │ └────────────────┘ └────────────────┘ └────────────────┘  │
+└─────────────┴─────────────────────────────────────────────────────────────┘
+以上是结构示意，名称和配置组合不是已存在的用户数据。
+
+2.1 首页结构
+• 标题 Bots；主要动作 New bot。
+• Bots 为默认视图；Motor library 为次级视图，集中管理电机型号与标定 profile，不占首页视觉中心。
+• Search 支持 Bot name；筛选 Feet、Motor、Action category、Configuration status；Sort默认Recently updated。
+• 筛选保留在返回状态中；Clear filters 清空，不清除机器人。
+• 可选紧凑列表作为辅助视图，但橱窗始终默认。
+
+2.2 卡片字段
+Preview：来自当前 Bot 外观版本的真实模型渲染/已存封面，显示完整头、脚和轮子。
+Bot name：最多两行，完整名称可查；不把文件名作为默认主标题。
+Feet：Standard feet / Roller feet，与真实硬件版本一致。
+Hardware：显示实际电机型号；只有上游family为xl330时显示 XL330 / Exact model unverified，不擅自补成某个销售型号。
+Mixed motors：最多显示两个型号再加“+N”，展开查看关节组；数量来自装配映射，不用14维动作推算全部舵机数。
+Software：按已保存 Configuration 去重显示动作类别；超过两行收起为“+N more”。
+Configurations：配置数量及 Draft / Ready / Needs review 摘要；不是训练成功率。
+Updated：次要时间信息；不把日期铺满封面。
+
+2.3 点击和菜单
+卡片主链接进入 Bot / Configuration；键盘 Enter 可打开。
+菜单 Rename / Duplicate / Archive 独立触发，不能同时跳转。
+Duplicate 复制配置为新Bot草稿，保留原始来源，不复制历史Run和消费。
+Archive 在有运行引用时只隐藏当前资产，不破坏历史快照；禁止用户误以为删除Bot会自动停止Run。
+New bot 主要入口始终在标题右侧；空状态可另有同名按钮，不用装饰性空卡挤占真实卡片。
+
+2.4 首页状态
+No bots yet. Create your first bot.
+No bots match these filters. Clear filters.
+Preview unavailable. Open the bot to reload its model.
+No actions configured. Create a configuration.
+缩略图失败不影响进入Bot；禁止用未标注的通用机器人图片冒充当前模型。
+
+三、新建 Bot — New bot
+
+桌面布局：左Viewer约696px，间距24，右设置约440px；1280px可缩为约600/376，窄屏改上下堆叠。
+左侧先看到当前模型，右侧所有更改都有明确反馈。底部 Create bot，不自动开始训练。
+
+┌────────────────────────────────────┬─────────────────────────────────────┐
+│ New bot                            │ Bot details                         │
+│ Model preview                      │ Name                                │
+│                                    │ Description                         │
+│                                    ├─────────────────────────────────────┤
+│ [Adaptive MuJoCo Viewer]            │ Appearance                          │
+│                                    │ Body color / Accent color           │
+│ Complete robot, no black bars      │ Color name + swatch                 │
+│                                    │                                     │
+│                                    │ Feet                                │
+│                                    │ Standard feet / Roller feet         │
+│                                    ├─────────────────────────────────────┤
+│ Fit bot  Orbit  Reset  Fullscreen   │ Hardware                            │
+│ Model revision / Preview mode      │ Motor profile                       │
+│                                    │ Joint group / Model / Count         │
+│                                    │ Select motor / New motor            │
+├────────────────────────────────────┴─────────────────────────────────────┤
+│ Cancel                                         Save draft    Create bot │
+└──────────────────────────────────────────────────────────────────────────┘
+
+3.1 Identity
+Name：必填、去除首尾空白、长度上限在产品实现前明确；同名可显示短ID区分，不强制改用户习惯名称。
+Description 可选。Draft 的明确保存状态可见；离开未保存内容时提示 Save draft / Discard changes / Stay。
+
+3.2 Appearance
+配色选项由可用材质映射决定；色块附英文名称，键盘可选，不只依赖颜色识别。
+Body color / Accent color 只改已声明的壳体材质，不改变碰撞、质量、关节极限。
+若开放自定义颜色，保存合法色值并保证选中边框可见；不是把模型替换成另一张图片。
+支持的部件范围如Body/Head/Feet由模型能力决定，不画出无法映射的颜色控件。
+外观变化可生成appearance revision；若颜色影响视觉观测则需关联训练输入版本。
+
+3.3 Feet
+Standard feet / Roller feet 为互斥选择。
+选择后显示 Applying hardware，加载对应MJCF、被动轮关节、碰撞设置和镜头范围。
+轮滑脚不是普通脚贴图：被动轮关节不能被自动分配主动电机。
+切换前有未保存配置时提示影响；创建完成后再换脚型需新hardware revision，并把相关Configuration标记Needs review。
+旧Run和Gallery成果仍绑定旧硬件，不被自动更新。
+切换失败保留最后成功模型，显示Previous model shown，不显示“已应用”却仍展示旧结构。
+
+3.4 Hardware
+默认摘要：Motor family、Motor profile revision、关节组、数量、控制模式、校验状态。
+可展开关节映射：Joint name / Actuator ID / Motor model / Profile revision / Active or passive。
+Select motor 弹出搜索列表，按机械、电气、控制和仿真支持分别标记，不给一个含糊的Compatible总勾。
+不兼容型号可查看说明，但不能直接应用。
+混用多种电机时可按关节组应用；左右组批量操作必须显示受影响关节清单，不能误改被动轮。
+数量来自实际装配和模型映射；模型14维动作不证明整机只有14个电机。
+
+3.5 保存规则
+Save draft：可保留缺字段/未校验状态，不允许Train in Arena。
+Create bot：身份、模型、关节映射必需信息通过后创建；仿真与硬件验证状态分别保存。
+成功后进入Bot / Configuration，提示Bot created. Create a configuration to start training.
+失败保留用户输入，字段错误定位到具体项。
+
+四、新建电机 — New motor
+
+不是只输入扭矩和转速即可得到可信仿真。新电机需同时描述实物、控制模型和标定数据。
+默认大侧面板约720px，内容长时可Expand to page；分组折叠，不把17个模型字段混成一列长表。
+来源方式：Duplicate existing profile / From scratch / Import calibration data（受控JSON，不执行用户代码）。
+
+分组A：Identity & source
+Display name、Manufacturer、Exact model、Revision、Datasheet URL、Calibration source、License、Notes。
+Backend actuator family 与商品型号不同：支持模型family从平台注册表选择，不能把任意商品名直接写入bam.actuators键。
+新型号没有受支持控制模型时可以Save draft，标记Simulation model missing，不能宣称可训练。
+克隆XL330参数用于不同电机时必须显示Uncalibrated copy；不得继承“已标定/已验证”的标签。
+
+分组B：Hardware specifications（实物规格）
+Voltage min/max / Recommended voltage（V）。
+Stall torque（N·m）、Stall current（A）、No-load speed（rpm），各附测试电压/条件。
+Gear ratio、Encoder resolution（counts/rev）、Mass（g）、Dimensions（mm）。
+Joint limits、Mechanical mount、Control mode、Bus protocol、Firmware revision按实际设备填写。
+连续额定扭矩缺失时为Not specified，不能用堵转扭矩代替。
+档案可保存未完成值；应用并训练前需通过平台所要求的物理与仿真字段检查。
+
+分组C：BAM calibration（标定模型）
+Model variant，如m6；Actuator backend，如xl330；下列15个数值键按原始模型分类。
+本组是拟合参数，不等于厂商铭牌。精度显示可以简化，但存储与导出保留原数值。
+
+参数键                              建议英文标签                    分类
+kt                                  Torque constant                  Electrical
+R                                   Motor resistance                 Electrical
+armature                            Reflected inertia                Dynamics
+q_offset                            Calibration offset               Calibration
+friction_base                       Coulomb friction                 Friction
+friction_stribeck                   Stribeck friction                Friction
+dtheta_stribeck                    Stribeck velocity                Friction
+alpha                               Stribeck exponent                Friction
+friction_viscous                    Viscous friction                 Friction
+load_friction_motor                 Motor-side load coefficient      Load friction
+load_friction_external              External-side load coefficient   Load friction
+load_friction_motor_stribeck        Motor-side Stribeck coefficient  Load friction
+load_friction_external_stribeck     External Stribeck coefficient    Load friction
+load_friction_motor_quad            Motor-side quadratic coefficient Load friction
+load_friction_external_quad         External quadratic coefficient   Load friction
+
+已确认/需核实的单位：
+• kt按电机模型约定为N·m/A，R为Ω，armature为kg·m²；保持与锁定控制模型的单位约定一致。
+• friction_base / friction_stribeck：N·m；dtheta_stribeck：rad/s；friction_viscous：N·m/(rad/s)，这些在BAM模型说明中有明确注释。
+• alpha为指数；线性load系数按公式量纲为无量纲，quadratic系数按公式量纲为(N·m)⁻¹，界面说明其为公式推导而非厂商规格。
+• q_offset为试验台标定偏移，不得冒充每个关节的物理极限或自动下发硬件零点；单位与适用路径由锁定adapter确认。
+• 不适用的m1–m5字段隐藏/标为Not applicable，不填0假装m6；原始未识别键保留审阅，不静默丢弃。
+
+分组D：Control model（控制模型）
+显示有效vin、kp_fw、current limit、模型实现来源及覆盖层。
+不能将厂商电压、BAM类默认电压、训练随机化电压放进同一个Voltage输入框。
+在锁定BAM版本中，XL330Actuator类默认vin=7.5、kp=400、max_current=1.75A；这些不是m6.json中的键。
+Microduck任务用kp_fw=200覆盖kp，vin_range覆盖固定vin。
+Microduck配置中“# max_current=1.75”是注释，不是启用覆盖；但BAM类本身确实有1.75A默认限制。
+因此不能把注释误当任务显式设置，也不能反过来说整个模型没有电流限制。
+该BamActuatorCfg未直接提供max_current配置字段；若需用户可编辑电流上限，必须先有受支持adapter，不伪造同名配置键。
+
+分组E：Validation & apply
+验证数值有限、JSON schema、受支持backend、所需键完整、关节映射、单位一致、资产存在、模型可编译。
+kt/R/armature等物理量做合理性检查；摩擦负值、颠倒范围、NaN/Inf不可提交。
+BAM源码中的拟合搜索范围不是硬件安全范围，不可用来批准实物电压或扭矩。
+标定profile只能标注Model checked / Calibration provided，不因JSON可解析就自动变成Hardware validated。
+Save motor：产生不可变profile revision，返回选择器并询问Apply to selected joints。
+真正改变安装/质量/惯量或驱动方式时，须同步更新机器人模型和配置；电机名字变化不能替代物理变化。
+
+五、已建 Bot — 默认 Configuration
+
+目标：本页负责训练参数，Viewer做上下文，不抢占主要编辑空间。
+页头Name、hardware revision、foot type、motor摘要；主标签Configuration / Hardware / History。
+Software以Configuration动作目录和摘要呈现，不另建一套相互重复的参数编辑页面。
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ SANDBOX / Bot name                                      Edit appearance  │
+│ Bot name             Standard feet / Hardware revision / Motor profile   │
+│ [Compact model preview]      Hardware                 Software            │
+│                              Actual motor model      Configured actions  │
+│ Configuration   Hardware   History                                      │
+├──────────────────────┬───────────────────────────────────────────────────┤
+│ Configurations       │ Walking baseline                       Version N  │
+│ New configuration    │ Source template / Readiness / Unsaved changes     │
+│                      │                                                   │
+│ Walking baseline     │ Commands     Value / Unit / Default / Source      │
+│ Ground pick trial    │ Rewards      Term / Weight / Effective schedule   │
+│ Roller crouch        │ Curriculum   Stage / Threshold / Value            │
+│                      │ Training     Iterations / Envs / PPO / Seed        │
+│ Draft / Ready        │ Randomization                                     │
+│ Needs review         │ Playback & evaluation                             │
+│                      │                                                   │
+├──────────────────────┴───────────────────────────────────────────────────┤
+│ Restore defaults                      Save configuration  Train in Arena │
+└──────────────────────────────────────────────────────────────────────────┘
+
+配置列表可以保留名称、动作、版本、状态；选中配置后主栏显示数值表单。
+空状态：No configurations yet. Start from an official policy template or build your own.
+History展示硬件、外观、配置的不同修订，避免只有一个无法解释的Version。
+有运行引用的已保存配置编辑为新草稿，Save configuration生成新版本；旧Run的参数保持冻结。
+修改电机/脚型后，旧配置仍可查看但显示Hardware changed. Review this configuration before training.
+
+六、New configuration 创建流程
+
+第一步：Name + Starting point
+A. Official policy template：十个官方动作卡片/紧凑列表，显示名称、脚型要求、kind、配方状态和来源。
+B. From scratch：不导入官方policy权重，从受支持的Task/Scene/训练基础schema创建新配置。
+“From scratch”不是任意Python脚本编辑器，也不是所有数值一律置零。
+平台基线值必须注明Platform baseline及版本；必需但无默认值的字段为空并提示，不用猜测值补齐。
+
+第二步：核对硬件与模板
+脚型不兼容时解释原因，提供Choose another template / Review bot hardware，不悄悄换Bot。
+左脚踢球、alpha_stand、velstand等映射不确定项仍在官方目录可见，可创建参考草稿；训练可用性单独判定。
+官方模板保存三类信息：
+1. Official policy reference：HF repo、revision、file、manifest；用于展示/参考/兼容性，非训练checkpoint。
+2. Training recipe：Task ID、训练源码commit、resolved参数、依赖；若只有对应任务，标签Related recipe，不能声称精确复现发布ONNX。
+3. Platform validation：GPU/runtime/profile和验证记录；本轮未做，不显示Ready for training假勾。
+
+第三步：编辑并保存
+新配置落到数值编辑页；每个可编辑值能看到Source / Default / Modified。
+Save configuration保存版本；通过训练准备检查后才启用Train in Arena。
+如果需要ONNX作为专家参考/蒸馏输入，必须由具体recipe明确支持并记录依赖，不作为通用warm start。
+
+七、官方动作完整目录（2026-09-26核对快照）
+
+HF repo：pollen-robotics/microduck-policies
+revision：1b56c396825c052a4e26e95cf2b8d8298af9e9b4
+API文件列表含10个ONNX、manifest.json、README.md、.gitattributes；未见完整训练checkpoint、独立训练配置或视频文件。
+共享声明：schema_version=2，model_api=1，obs_len=61，action_len=14，robot.model=microduck，hw_rev=1，servos=xl330，control_hz=50。
+这些属于运行时兼容契约，不是随意可调的学习参数。
+
+英文显示名称              文件                         已声明kind / 特性
+Walking                  alpha_walking.onnx           perpetual
+Walking & recovery       velstand.onnx                perpetual；slot=walk；entry_pose=standing
+Standing                 alpha_stand.onnx             perpetual
+Roller skating           roller.onnx                  perpetual；mode=roller
+Sit / stand              alpha_sitstand.onnx          scripted；posture_flag
+Ground pick              alpha_ground_pick.onnx       episodic；phase
+Roller crouch            roller_crouch.onnx           episodic；mode=roller；phase
+Forward roll             roulade.onnx                 episodic；chain=true
+Left kick                ball_kick_left.onnx          episodic
+Right kick               ball_kick_right.onnx         episodic
+
+名称是平台可读标签，不改变原文件名或上游语义。左右踢球单列，不合并成一个模糊Kick。
+只有roller/roller_crouch明确声明mode=roller；其余脚型兼容结合模型/推理adapter验证，不把未声明字段当false。
+
+7.1 训练配方关联状态
+以下是功能对应候选，不是已证明生成该ONNX的原始训练配方：
+Walking → Mjlab-Velocity-Flat-MicroDuck；可关联Velocity训练表单。
+Walking & recovery → Mjlab-VelStand-Flat-MicroDuck；发布metadata只到protective_fall分支及velstand_best.onnx，精确commit映射待确认。
+Standing → 当前存在Mjlab-StandUp-Flat-MicroDuck，但“保持站立”和“跌倒起身”不是同一任务；不可直接自动映射alpha_stand。
+Roller skating → Mjlab-Velocity-Flat-MicroDuck-Rollers；要求轮滑模型。
+Sit / stand → Mjlab-SitStand-Flat-MicroDuck。
+Ground pick → Mjlab-GroundPick-Flat-MicroDuck。
+Roller crouch → Mjlab-RollerCrouch-Flat-MicroDuck。
+Forward roll → Mjlab-Roulade-Flat-MicroDuck。
+Right kick → Mjlab-BallKick-Flat-MicroDuck；注册源码明确右脚任务。
+Left kick → 当前已核对注册表没有独立左脚条目；不能只改文件名或镜像几个数字就标为已验证训练配方。
+
+标签体系：Policy reference available / Related recipe / Recipe mapping required / Platform validation pending。
+用户要求“包含全部动作”落实为目录不遗漏、参考草稿可建、已声明播放数值可编辑；不以虚假配方冒充十项全部可直接训练。
+最终支持训练的范围以明确映射与平台测试结果决定；未就绪项保留原因及下一步，不隐藏。
+
+7.2 官方manifest中已知的动作数值
+Walking：未单独声明动作数值；不为其凭空填duration或action_scale。可从已确认训练recipe编辑命令范围/PPO/奖励，不称这些来自ONNX。
+Walking & recovery：未单独声明可调数值；有slot/entry_pose及来源metadata。训练字段来自匹配recipe，而非从ONNX反推。
+Standing：未单独声明可调数值；映射确认前允许参考草稿，不伪造“恢复默认奖励”。
+Roller skating：action_scale=0.8。
+Sit / stand：command.sit=1.0；command.stand=0.0；command.idle=[0.0,0.0,0.0]；ramp_s=2.0；unwind_s=1.0。
+Ground pick：duration_s=2.8；command.period_s=4.0；command.end_phase=0.7。
+Roller crouch：duration_s=3.5；action_scale=0.8；command.period_s=5.0；command.end_phase=0.7。
+Forward roll：duration_s=1.0；chain=true是布尔控件，不伪装成任意浮点数。
+Left kick：duration_s=0.5。
+Right kick：duration_s=0.5。
+
+单位：*_s为秒；phase和action_scale为无量纲；命令flag为编码值，不是速度m/s。
+结构字段kind、command.encoding、slot、obs_len、action_len、model_api按adapter受控，只读或受限制选择，不因它们也是数字/字符串就允许任意篡改。
+未声明的字段显示Not specified或由锁定adapter解析并说明来源；不将“缺失”填成0/false。
+修改数值只创建派生播放配置，不改变官方ONNX权重；界面标记Modified playback settings。
+
+八、Teach式数值编辑器
+
+借鉴Teach的按动作组织、奖励项和即时差异，不加入“自然语言一句话自动生成正确奖励”的虚假承诺。
+主控件为数字输入；滑块只作辅助调节，不能是唯一输入方式。每个可调数值都有键名、单位、来源和恢复入口。
+默认分区：Commands → Rewards → Curriculum → Training → Randomization → Playback → Evaluation。
+
+字段行
+Label | Numeric input / Min–Max pair | Unit | Default | Modified indicator | Restore field
+帮助内容包含：参数作用、源码键/路径、支持范围、是否影响训练或仅评估播放。
+奖励列表：Reward term / Initial weight / Schedule / Description；负奖励保留原符号。
+二维范围用Min与Max；向量分别输入X/Y/Z；整数不接受小数；浮点接受科学计数法。
+输入为空不等于0；stepper不擅自把高精度参数舍入。显示值可短，查看/复制原值保持完整精度。
+失焦/Enter提交单字段草稿；保存前汇总校验；页面跳转有未保存保护。
+不会因为拖滑块就启动训练，也不会改变其他正在运行的Run。
+
+8.1 Training共同字段
+Target iterations（正整数）、Parallel environments（正整数）、Seed（整数，平台约束说明）、Checkpoint interval（iterations）。
+Rollout steps per environment、Learning rate、PPO epochs、Mini-batches、Clip parameter、Entropy coefficient、Gamma、Lambda、Desired KL、Max grad norm。
+布尔/枚举使用对应控件；不把normalization或schedule强行变成数值。
+依赖继承的默认值需在匹配运行环境解析后形成resolved快照，不能仅靠页面上几项常量声称完整参数。
+若recipe隐藏了运行所需参数，View all parameters显示解析值和来源；未暴露编辑的固定项标明原因。
+
+8.2 可核对的Walking示例（不是全部动作或GPU的共同默认值）
+训练源码commit：cb70b792312d559a4da09064d92009079671815f。
+MicroduckRlCfg.max_iterations = 50000
+MicroduckRlCfg.num_steps_per_env = 24
+MicroduckRlCfg.save_interval = 250
+MicroduckRlCfg.algorithm.learning_rate = 1.0e-3
+MicroduckRlCfg.algorithm.num_learning_epochs = 5
+MicroduckRlCfg.algorithm.num_mini_batches = 4
+MicroduckRlCfg.algorithm.clip_param = 0.2
+MicroduckRlCfg.algorithm.entropy_coef = 0.01
+MicroduckRlCfg.algorithm.gamma = 0.99
+MicroduckRlCfg.algorithm.lam = 0.95
+MicroduckRlCfg.algorithm.desired_kl = 0.01
+MicroduckRlCfg.algorithm.max_grad_norm = 1.0
+MicroduckRlCfg.algorithm.value_loss_coef = 1.0
+actor.hidden_dims = (512,256,128)；critic.hidden_dims = (512,256,128)。
+布尔/枚举：obs_normalization=true，use_clipped_value_loss=true，schedule=adaptive。
+
+命令范围：
+cfg.commands["twist"].ranges.lin_vel_x = (-0.4,0.4) m/s。
+cfg.commands["twist"].ranges.lin_vel_y = (-0.3,0.3) m/s。
+cfg.commands["twist"].ranges.ang_vel_z = (-1.0,1.0) rad/s。
+
+奖励示例：
+track_linear_velocity=2.0；track_angular_velocity=2.0；upright=2.0；head_pose_tracking=2.0。
+action_rate_l2初值=-0.1，课程可变化至-1.0。
+head_pose_bias初值=0.0，课程可变化至3.0；不得因名称像惩罚就改成负数。
+课程编辑必须显示分阶段权重，单改初始值不能暗示整个训练阶段都已更改。
+上列只是经源码核对的代表字段，完整表单须加载该版本resolved配置；不将未核对字段补成“官方默认”。
+
+8.3 每动作编辑重点
+Walking：线/角速度范围、头部命令、跟踪/站稳/平滑奖励、PPO、随机化。
+Walking & recovery：速度与恢复相关参数、初始状态、恢复课程、专家/预训练依赖；须匹配protective_fall来源。
+Standing：站姿/身体姿态相关表单等待精确recipe映射；不强行借StandUp起身阈值作为其默认。
+Roller skating：速度命令、轮滑接触/场景、动作幅度、稳定和平滑参数；被动轮不新增电机动作维度。
+Sit / stand：坐站控制、姿态过渡、对应奖励、ramp/unwind与posture_flag联动。
+Ground pick：下降/停留/回升phase、口部接地目标、回姿/碰撞惩罚、播放时序。
+Roller crouch：轮滑蹲下目标、稳定/回姿、phase/period/end_phase/duration。
+Forward roll：翻滚轨迹/目标、接触与成功判定、播放时长；训练键按实际recipe加载。
+Left kick：左脚任务、球和目标的受控schema待映射；播放duration可按已知manifest编辑。
+Right kick：右脚任务、球场景、踢球目标、站稳/平滑、播放duration。
+这些是表单分区与内容范围，不把描述性标签伪装成未经确认的上游参数键。
+
+8.4 Ground pick时序联动警告
+发布manifest：period_s=4.0、end_phase=0.7、duration_s=2.8。
+当前关联训练源码常量：GP_PERIOD=4.0、DESCENT_END=0.375、HOLD_END=0.425、RISE_END=0.80。
+若从phase=0按该周期运行，0.80对应3.2秒，和发布2.8秒截止不同。
+这是“相关训练recipe不一定就是发布ONNX原始recipe”的具体证据，不能自动把它们合并为同一默认模板。
+绑定哪个recipe/播放adapter就按哪个版本校验；出现阶段不覆盖时提示Timing mismatch，要求评估确认。
+仅在adapter规定phase从0开始匀速推进时检查duration≈period×end_phase；不对所有策略套同一个公式。
+
+8.5 训练随机化参数
+来自Microduck任务配置，不属于电机厂商铭牌：
+kp_fw=200.0；vin_range=(6.5,8.2)V；vin_drop_gain_range=(0.0,0.2)V/N·m；vin_min=6.0V。
+delay_min_lag=3；delay_max_lag=6，单位按执行器定义为simulation steps，不能直接写成毫秒或50Hz控制步。
+vin_drop_gain_range按锁定BAM版计算V_drop=gain×sum(abs(previous motor torque))。
+friction_scale缩放Coulomb/Stribeck/负载相关摩擦，不含viscous项；其数值范围由任务版本给出，不凭印象填值。
+其他质量/惯量、地面、IMU/编码器、观测/命令延迟按实际支持字段组织。
+随机化范围必须min≤max，并与上下游语义一致；它们不是允许下发真机的安全范围。
+
+8.6 保存与恢复
+Restore field：恢复该键的绑定默认值，标记未保存，可Undo。
+Restore section：预览本组修改数量与差异，确认后只改本组。
+Restore defaults：确认框列出将重置的参数数量/分组，恢复创建配置时固定的template/platform baseline revision。
+不改变Bot名称、外观、硬件版本、已有Run、成果、预算、账户，也不删除配置。
+From scratch的恢复目标是创建时Platform baseline，不假称“官方默认”；没有默认值则恢复为空/未设置并说明。
+Changing source template 与Restore defaults不是同一操作；新模板用Review template update显示差异并生成新版本。
+已保存版本不可原位重写；恢复后Save configuration生成新版本。
+
+九、校验、状态与英文反馈
+
+状态维度：
+Draft / Saved：保存状态。
+Incomplete / Needs review / Ready for training：配置准备状态。
+Policy reference available / Recipe mapping required / Platform validation pending：来源与能力状态。
+Simulation model checked / Not hardware validated：仿真与真机分别标记。
+
+关键阻断：
+必需参数缺失；NaN/Inf；上下界反转；未知执行器backend；模型文件缺失；脚型/任务不兼容；关节映射冲突。
+recipe依赖未找到；checkpoint契约不兼容；未通过平台运行环境认证；商业素材权限未确认。
+不只给一个红色错误总数，按分组链接到字段。
+
+英文反馈：
+Bot created. Create a configuration to start training.
+Motor profile saved. Apply it to the selected joints?
+This motor has no supported simulation model yet.
+Hardware changed. Review this configuration before training.
+Official policy available. Training recipe mapping is still required.
+These values control playback. They do not retrain the policy.
+Changes saved as a new configuration version.
+Restore the defaults from this template version?
+Timing mismatch. Review the recipe and playback settings together.
+Model could not load. Your changes are still available.
+
+十、Viewer与响应式
+
+全部遵循ARENA文档第七节：实际模块尺寸驱动渲染buffer/帧流和相机；无黑条、无拉伸、无裁脚。
+New bot大Viewer突出硬件选择；Bot详情缩为上下文预览，主体仍是参数。
+切脚型/电机后显示Applying hardware，失败保留旧模型并标注。
+没有policy时显示Model preview；没有真实MuJoCo连接不展示假走路动画。
+模板数值修改可以更新独立预览，但必须明确是Playback或Evaluation，不把它显示为训练已改善。
+橱窗封面可静态缓存；屏幕中不同时运行所有卡片的MuJoCo实例。
+
+桌面3列，较窄2列，手机1列；复杂表单分组展开，单位和输入不被截断。
+键盘可选卡片、模板、颜色，数字字段支持直接输入；滑块需有数值替代。
+恢复/删除/离开对话框管理焦点，执行后提供Undo或明确版本恢复方式。
+
+十一、电机参数原始依据与完整数值附录
+
+训练源码：pollen-robotics/microduck_rl @ cb70b792312d559a4da09064d92009079671815f。
+其uv.lock固定BAM：62bd8ce12154340be97e06f7f41a0ca8f116d967，分支mjlab_frictionloss。
+不要将BAM另一个revision中的vin_drop_resistance_range（Ω）直接代替本版本vin_drop_gain_range（V/N·m）。
+同名业务标签“Voltage sag”不代表底层参数和值可以跨API版本直接迁移。
+
+bam/params/xl330/m6.json完整17键（15数值+2标识）：
+{
+  "kt": 0.36601349688984386,
+  "R": 2.8113923539223227,
+  "armature": 0.0018077432831600838,
+  "q_offset": 0.0271132870444849,
+  "friction_base": 0.004771183165566,
+  "friction_stribeck": 0.004676345799486616,
+  "load_friction_motor": 0.2667860954283698,
+  "load_friction_external": 8.515871897059342e-06,
+  "load_friction_motor_stribeck": 1.0722918395099123e-05,
+  "load_friction_external_stribeck": 0.08077928978935671,
+  "load_friction_motor_quad": 0.009972471242139415,
+  "load_friction_external_quad": 0.004902565732332559,
+  "dtheta_stribeck": 2.890372094130307,
+  "alpha": 8.683259907618984,
+  "friction_viscous": 0.005359668274599504,
+  "model": "m6",
+  "actuator": "xl330"
+}
+
+代表拟合范围（不是硬件安全限值）：
+q_offset [-0.1,0.1]；friction_base/stribeck [0,0.2]；load_friction_motor/external [0,0.5]。
+load_friction_*_stribeck [0,1]；load_friction_*_quad [0,0.01]。
+dtheta_stribeck [0.01,5]；alpha [0.5,10]；friction_viscous [0,1]。
+这些范围来自当前模型拟合定义；新电机若需超出，应由模型/标定审核，不自动截断用户输入。
+
+厂商规格示例（仅针对已核对的XL330-M288-T，不证明Bot装的必然就是此子型号）：
+输入3.7–6.0V，推荐5.0V；质量18g；20×34×26mm；齿比288.4:1；4096counts/rev。
+5.0V工况：堵转扭矩0.52N·m、堵转电流1.47A、空载103rpm。
+堵转电流不是固件电流上限，堵转扭矩不是连续额定扭矩。
+上述厂商范围与BAM默认7.5V、训练6.5–8.2V存在来源差异，需核实电源拓扑/标定含义，不得据此给实物超压供电。
+本平台首版不进行真机电源/固件下发，界面仍必须区分与警示。
+
+十二、验收清单
+
+[ ] 首页默认橱窗，每张卡有Duck外观、Hardware电机型号、Software已配置动作、进入Bot入口。
+[ ] New bot可选配色/普通脚/轮滑脚，Viewer真实更新且符合无黑边契约。
+[ ] Hardware可选电机、新建profile，15个数值模型键均可在对应分组找到，不遗漏或混淆来源。
+[ ] 被动轮/间隙关节不被错误分配主动电机；更换物理配置产生版本并触发复核。
+[ ] 已建Bot默认Configuration；新建支持Official policy template与From scratch。
+[ ] 十个官方动作全部可见，左右踢球独立；缺recipe不填假值或假可训练状态。
+[ ] 所有支持的参数可精确数值编辑；固定契约项明确只读，布尔/枚举用正确控件。
+[ ] 单字段/分组/全配置Restore defaults可核对、可撤销、绑定固定版本。
+[ ] 从SANDBOX到ARENA携带保存版本；回到SANDBOX调整后需重新确认，不静默覆盖。
+[ ] Draft、Saved、Ready、Trained、Hardware validated分别表达。
+[ ] 模型/电机/模板失败时保留输入，有Retry或明确修复路径。
+本轮定义上述验收条件，未运行仿真/训练或界面自动化测试。
+
+十三、固定来源
+
+官方模型API：
+https://huggingface.co/api/models/pollen-robotics/microduck-policies
+官方manifest：
+https://huggingface.co/pollen-robotics/microduck-policies/resolve/1b56c396825c052a4e26e95cf2b8d8298af9e9b4/manifest.json
+训练注册表：
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/src/mjlab_microduck/tasks/__init__.py
+电机任务配置：
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/src/mjlab_microduck/robot/microduck_constants.py
+依赖锁定：
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/uv.lock
+BAM参数：
+https://raw.githubusercontent.com/Rhoban/bam/62bd8ce12154340be97e06f7f41a0ca8f116d967/bam/params/xl330/m6.json
+BAM执行器API：
+https://raw.githubusercontent.com/Rhoban/bam/62bd8ce12154340be97e06f7f41a0ca8f116d967/bam/mjlab.py
+BAM控制模型：
+https://raw.githubusercontent.com/Rhoban/bam/62bd8ce12154340be97e06f7f41a0ca8f116d967/bam/dynamixel/actuator.py
+BAM模型参数定义：
+https://raw.githubusercontent.com/Rhoban/bam/62bd8ce12154340be97e06f7f41a0ca8f116d967/bam/model.py
+Walking参数：
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/src/mjlab_microduck/tasks/microduck_velocity_env_cfg.py
+Ground pick参数：
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/src/mjlab_microduck/tasks/microduck_ground_pick_env_cfg.py
+厂商：
+https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/
+交互：
+https://github.com/jonathanhawkins/microduck-lab
+
+所有来源值只代表指定版本。新policy、BAM API或模板变化应触发Review update，不自动覆盖用户现有配置。

@@ -1,0 +1,10 @@
+Model files in this directory come from pollen-robotics/microduck_rl
+(https://github.com/pollen-robotics/microduck_rl).
+
+- Code: Apache License 2.0 (see LICENSE).
+- 3D model files: Creative Commons BY-SA-NC per the upstream README.
+
+The 3D assets are used here only for local development of the TrainMyBot
+frontend demo. Using them inside a paid training service requires separate
+commercial permission from the rights holder — this is an open pre-launch
+item (see Microduck-ARENA-Structure-v0.3, section 9).

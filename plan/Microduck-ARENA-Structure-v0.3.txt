@@ -1,0 +1,366 @@
+MICRODUCK — ARENA 页面结构设计细化方案 v0.3 / 修订 2026-09-26 / R2
+Iterations · Elapsed · Loss · Logs · Checkpoints · Read-only rewards
+
+文档状态
+保留原文件名并原位修订，与同日 Website / SANDBOX / GALLERY / MASTER R2 配套。
+本轮仅设计规格，不写网站代码、不接入真实 GPU、不声称画布已同步。旧 ARENA 画布仍为未验收部分草稿。
+界面全部英文；说明中文。正式字体 Avenir Next，布局稿允许 Inter Tight。
+
+一、范围与页面分工
+
+用户澄清：原 Metrics 指 Loss，用于观察训练优化趋势；los 指 Logs。
+训练信息白名单：Iterations / Elapsed / Loss / Logs / Checkpoints。
+另保留 Reward configuration 的只读数值配置，不显示实时贡献图或奖励排行榜。
+MuJoCo Viewer、任务识别、状态与停止是必要预览/控制，不属于追加训练指标。
+
+移除：
+• Episode reward / Episode length 曲线及原 Metrics 标签。
+• ETA、Environment steps、Throughput、FPS、VRAM、GPU utilization、学习率/KL/Entropy等独立统计卡或图表。
+• Compute / Budget / Connection 侧栏面板、独立 Configuration 监控标签及重复进度卡。
+• 所有用户可见 Credits、费率、余额、预算、金额、消费与账务状态，包括顶栏、列表、确认框、日志和下载。
+上述调试数据若后台保留，不等于重新开放 ARENA 的隐藏监控大屏；配置中的学习率等仍可在 SANDBOX 查看。
+
+职责：
+SANDBOX：Bot、硬件、动作与训练参数编辑，保存不可变 Configuration version。
+ARENA：选择已保存配置和算力，准备任务、启动、观察、停止、成果转交。
+GALLERY：默认私有成果预览、评估、参数/ONNX/视频下载。
+MASTER：所有用户可见财务内容及服务授权，详见 MASTER 文档 AUTH-01。
+
+参数归属：
+Bot / Appearance / Feet / Motor / Joint mapping                 SANDBOX / Bot
+Task / Rewards / Curriculum / PPO / Seed / Environments          SANDBOX / Configuration
+Target iterations / Checkpoint interval / Evaluation preset     SANDBOX / Configuration
+Run name / GPU / Maximum runtime / Resume checkpoint            ARENA / New run
+受控输出开关 / Stop run / 预览相机                               ARENA
+费率 / 预算 / 余额 / 授权 / 消费 / 账单 / 财务提醒               MASTER > Credits
+
+二、视觉与技术前提
+
+颜色：Page #FFFFFF、Sidebar #F7F7F5、Text #37352F、Muted #73716A、Divider #E9E9E7、Hover #EFEFED。
+字阶32/18/14/13/12px，数字Regular、数值右对齐，Avenir Next（布局Inter Tight）。
+按钮36px，触控约44px，圆角4–6px，媒体8px；细实线、无渐变/厚阴影/毛玻璃。
+1440px：侧栏216、顶栏48、内容左右32、内容宽1160；主区808 + 间距24 + 奖励栏328。
+窄屏改为单列，Reward configuration移到Viewer之后，不缩小字号或遮挡Stop run。
+保持Notion轻量页面，不因精简又把五个项目变成五张巨大KPI卡。
+
+上游分工与既有来源边界：
+• microduck-lab 参考 Teach/曲线/日志交互，不作为 CUDA 后端（其 CPU MuJoCo + SB3 路线不同）。
+• microduck 参考运行时与 manifest；microduck_rl 参考 mjlab / MuJoCo Warp + PPO、rsl_rl、BAM及导出。
+• 官方 --hf-jobs 不等于平台已接通供应商。
+• 标准桌面 RTX4070/5060 按实际节点和镜像分别验证；不把GPU名称当支持证明，不承诺4096envs/固定时长。
+• 上一轮查阅快照：4070 12GB/Ada/CC8.9；5060 8GB/Blackwell/CC12.0，不含Laptop/Ti/SUPER，以上不是本轮实测。
+• 上游固定源码 cb70b792312d559a4da09064d92009079671815f 的依赖快照为 Python>=3.12,<3.13、mjlab1.3.0、warp-lang1.12.0、torch2.9.1；不是已认证的平台镜像。
+• Loss实际输出键及PPO实现定义需随锁定runner适配，不凭SB3或另一版rsl_rl的标签猜字段。
+
+三、Runs 与入口
+
+默认轻量列表：Run / Bot & configuration / Status / Iterations / Elapsed。
+合并Bot和配置为双行来源，不再另列Task/GPU/财务；Task可在配置查看，GPU在创建时选择。
+筛选：Status / Bot / Date；Search runs；默认Recently updated。
+New run为主按钮；空状态：No training runs yet. Choose a saved configuration to start.
+
+入口：
+• SANDBOX的Train in Arena携带Bot ID、hardware revision、configuration version；不传未保存值。
+• New run先选Bot再选已保存配置；不完整配置可浏览但不能执行。
+• Duplicate run setup复制配置引用和运行设置，不复制Loss、日志、checkpoint、消费或旧授权。
+• Resume from checkpoint仅完整且兼容的训练状态可用；ONNX不替代optimizer/normalizer/runner state。
+• GALLERY的Create configuration回SANDBOX创建派生版本，不把已有ONNX称为可直接续训。
+
+配置更新提示Newer configuration available，默认继续当前版本；Review changes后显式Use this version。
+从SANDBOX返回保留运行草稿和输出选择，重新做兼容检查；涉及授权签名的变化必须重新去MASTER审查。
+没有单独Compute监控页；算力可用性和技术兼容仅在New run选择处显示。
+
+四、New training run
+
+┌─────────────┬───────────────────────────────────────────────────────────┐
+│ Microduck   │ ARENA / New run                                  Account  │
+│ SANDBOX     │ New training run                              Save draft  │
+│ ARENA       ├─────────────────────────────────┬─────────────────────────┤
+│ GALLERY     │ Run name                        │ Reward configuration    │
+│             │ Bot & saved configuration       │ Term / Weight           │
+│             │                                 │ Parameters              │
+│             │ Model preview                   │ Read only               │
+│             │ [Adaptive MuJoCo Viewer]        │ Edit in Sandbox         │
+│             │                                 │                         │
+│             │ Compute / Maximum runtime       │                         │
+│             │ Outputs                         │                         │
+│ MASTER      ├─────────────────────────────────┴─────────────────────────┤
+│             │ Draft saved                             Review in Master │
+└─────────────┴───────────────────────────────────────────────────────────┘
+线框为结构示意；未授权时Review in Master，已有效授权且技术检查通过后主按钮为Start training，不并列两个主按钮。
+
+A. Identity / Configuration
+Run name必填，Description可选；Save draft不启动任务。
+选择器展示Bot、Action、Configuration version、Readiness；Open in Sandbox/查看源版本是轻量链接。
+最小摘要：目标iterations、选定配置版本；其他配置通过源链接查看，不再复制一整页参数表。
+Reward configuration使用第五节F的相同组件，尚未运行时只有配置值，没有Current遥测。
+模型无policy时称Model preview；外力稳定标Stabilization assist，不播放假学会动作。
+需要付费云资源的独立预览也遵守AUTH-01，打开草稿不会自动收费。
+
+B. Compute / Maximum runtime
+GPU首版单卡，从平台实际可用且已验证的RTX4070/5060组合选择；Runtime profile只读，必要时展开技术详情。
+Availability与兼容状态不混入费率/成本；无有效镜像/基准显示Not verified并阻止执行。
+Parallel environments属于SANDBOX Configuration，不能因显存不足静默从4096改成1024。
+文案：Selected GPU needs a smaller environment count. Edit the configuration in Sandbox.
+Maximum runtime为整个执行请求的操作时长限制，不是财务预算；在ARENA设定并纳入MASTER授权请求签名，授权后修改须重审。
+计时从本请求首次获得执行资源开始，到所有已选服务完成；包括初始化、训练、评估/导出/录制及首次分配后的自动重试等待，不包括首次分配前的排队。重试不重置截止时间；与仅累计训练活动的Elapsed不同。
+到期不再启动新阶段，取消未开始的后处理，正在执行的阶段进入停止/保存/释放流程；最终清理耗时单独留痕，不能宣称物理资源必然在截止瞬间释放。需要继续未完成的服务时创建新请求并重新审查。
+达到目标iterations可结束训练并继续已选后处理；时长上限或后台授权限制先到则按上述流程停止整个请求，页面没有预算编辑器。
+
+C. Start state / Resume
+New training使用受控配方初始化；官方ONNX仅作参考时不能暗示warm start。
+Resume检查policy/optimizer/normalizer/runner state及runtime、观测、动作、硬件和配置。
+创建时展示Source run、Checkpoint iteration、Target total iterations、Remaining planned iterations。
+目标以绝对累计iteration解释；后端如接收追加数量需转换，不能让用户重复追加完整目标。
+改奖励/电机/环境配置需先在SANDBOX派生并验证，不称为完全相同续跑；新Run拥有新授权，不继承旧消费。
+依赖expert policy等外部文件须实际存在且授权可用，From scratch不免除依赖校验。
+
+D. Outputs
+Evaluate after training使用已保存Evaluation preset；改变评估语义回SANDBOX。
+Record preview只展示时长/分辨率/场景选择，不在此显示费用；未披露收费规则不能付费启用。
+Export ONNX遵循官方导出路径与normalizer，实际检查IO/shape/dtype/model_api。
+Keep checkpoint的保留期由真实存储策略给出，未定不写死30天；Destination默认为Private gallery。
+冻结训练参数快照必存，财务信息不混入parameters或成果包。
+
+E. Review / Start（AUTH-01）
+1. 技术静态检查：配置、依赖/模型、电机、授权许可、输出权限和镜像准入。
+2. Review in Master保存草稿，进入MASTER > Credits > Review request；费率、预算、计费起止、余额问题仅在那里呈现。
+3. Confirm and return回原草稿，不启动、不宣称已分配GPU；取消不丢配置。
+4. Start training由用户再次点击；后端复核固定配置/资源/输出/时长签名、有效授权与并发额度，防重提交。
+5. 授权失效时只显示Review in Master与中性说明Review this request in Master to continue；详细财务原因仅MASTER。
+6. Submitting超时先查同一请求结果，不重复创建训练；一份授权只消费于对应执行请求。
+7. 分配节点后才验证真实型号/显存、Torch/Warp、模型加载与短程数值稳定性；没有节点不能称GPU实测通过。
+8. 初始化失败显示Failed to initialize，技术原因入脱敏Logs；相关费用如何处理在MASTER，ARENA不做结算承诺。
+
+五、Run details：默认运行页
+
+┌─────────────┬───────────────────────────────────────────────────────────┐
+│ Microduck   │ ARENA / Runs / Walking baseline                   Account │
+│ SANDBOX     │ Walking baseline                       Running  Stop run │
+│ ARENA       │ Bot / Configuration             View source configuration│
+│ GALLERY     │ Iterations  current / target       Elapsed  hh:mm:ss     │
+│             ├─────────────────────────────────┬─────────────────────────┤
+│             │ Latest evaluation               │ Reward configuration    │
+│             │ Checkpoint / Captured at        │ Term / Weight           │
+│             │ [Adaptive MuJoCo Viewer]        │ Parameters              │
+│             │                                 │ Curriculum (if present) │
+│             │ Pause preview / Camera / Fullscreen                     │
+│             ├─────────────────────────────────┤ View all reward terms   │
+│             │ Loss   Logs   Checkpoints       │ Edit in Sandbox         │
+│             │ [Active panel]                  │                         │
+│ MASTER      │                                 │                         │
+└─────────────┴─────────────────────────────────┴─────────────────────────┘
+所有显示值来自真实任务，线框没有虚构loss下降、消费或训练成功数据。
+
+A. 页头与操作
+只显示Run name、Job status、Bot/Configuration；Run ID可在名称详情复制。
+必要操作Stop run；结束后按实际状态提供View in Gallery / Save to Gallery。
+完整配置在View source configuration打开相应SANDBOX冻结版本，不是另起一个ARENA配置大面板。
+运行或预览断开只用紧凑内联提示，不长期展示Connection统计区。
+财务原因引发的终止仍明确显示Stopped及Review in Master入口，不把它误写为技术失败，也不在此显示金额/余额。
+
+B. Iterations
+常规运行：completed / target，按runner确认完成的iteration计数，界面统一面向用户的计数起点。
+暂停更新不补进度、不推测完成；Queued/Initializing尚无iteration显示“—”，收到真实0再显示0。
+续训：主值显示累计current / absolute target，副说明Resumed from iteration N；本次推进量可在说明中查看，不增加指标卡。
+不能把environment steps、rollout samples当iterations；不以100%宣称动作已经收敛。
+
+C. Elapsed
+表示本次Run所有实际训练活动区间的累计墙钟时长，由后端权威时间计算。
+不计排队、初始化、未运行的重启间隔和后处理；续训不把来源Run时长加进来；具体active阶段事件必须由后端提供。
+这不是GPU账单时长，两者不要求相等；计费起止仅MASTER解释。
+Running中可用服务端已确认值做短时显示插值；重连后校准，长时间断线标最后已知状态，不无限猜测。
+Stopped/Completed/Failed后冻结最终值。无可靠起止时间显示“—”，不用浏览器开页时长代替。
+
+D. Loss（默认标签）
+目的：观察优化损失随训练推进的变化，不宣称单凭损失判断策略表现。
+默认最多两个上下排列的小图：Policy loss / Value loss；同属一个Loss区，不新增Metrics区。
+仅当真实runner确实输出且定义可解释时呈现对应序列；Policy loss若实际是surrogate loss须在图例说明。
+字段适配应记录：原始key、显示名、计算语义、loss符号、系数是否已乘、batch/epoch聚合口径、iteration索引与runner版本。
+上述名称是平台展示约定，不宣称当前锁定源码已验证存在某个具体输出key。
+没有Policy loss就显示该项未上报或只显示真实可用Value loss；两者都没有显示Loss unavailable，不能拿Reward/Length替代。
+不把policy/value相加造“Total loss”，不新增Entropy、KL等曲线；原始遥测留后台工程诊断。
+
+图表规则：
+• 横轴固定Iterations；续训从来源iteration后开始，不把未继承的历史点补齐；gap处断线。
+• 纵轴为该项真实Loss value，允许负数，不取绝对值；不同尺度不叠加到无标注双轴图。
+• Raw默认可见，Smoothing可选且默认Off；启用需显示方法/窗口，原始值仍可查看。
+• Tooltip显示iteration、raw loss、可选smoothed loss；图表提供可访问的数值表/摘要。
+• 正常小数变化不强制从零起轴，必须标完整刻度且不制造夸张改善；保持同图尺度稳定。
+• No loss data yet / Loss unavailable / Data delayed区分等待、未接入和迟到，不填0。
+• NaN/Inf不画成0，产生Numerical instability内联事件，按已配置安全策略处理。
+• PPO损失可能震荡、为负且不能跨奖励/硬件/任务简单排名；无自动Converged、Success或收敛百分比。
+• 图下短说明：Loss shows optimization trends, not policy quality. Review the simulation and evaluation results.
+不再呈现Episode reward / Episode length，也不在高级开关中重新加回。
+
+E. Logs / Checkpoints
+Logs：浅色紧凑文本列表，Time / Level / Message；默认实时尾随，可Pause log scrolling（不是暂停训练）。
+提供Search、Level筛选、Resume live、Copy、Download logs；清除筛选不删除原日志。
+日志可分段/虚拟滚动，续连从最后事件位置恢复并去重，缺段明确标Missing log segment。
+Avenir Next保持全站字体，保留换行与原消息内容；长路径换行，Copy保留完整脱敏文本。
+错误提升到页内但不重复刷屏。账号令牌、供应商地址/私有路径、财务字段不进用户技术日志。
+授权/账务事件保存在MASTER审计记录；ARENA只允许无财务细节的Execution stopped等状态事件。
+
+Checkpoints：Iteration / Saved at / Status / Actions；Size、Reason、验证详情按行展开。
+Latest与Best分开，没有明确评估协议不标Best，最低Loss也不自动等于最佳动作。
+Request checkpoint只有runner支持且可执行时出现，Requested → Saving → Saved / Failed。
+Download checkpoint仅真实可用且用户有权限时开放；过期/校验失败状态保留，不能声称可恢复。
+Resume from checkpoint创建新Run，经兼容检查及新的MASTER授权；原Run保持不变。
+ONNX是推理产物，不是完整训练checkpoint。
+
+F. Reward configuration（右栏，只读）
+内容来自本次Run实际冻结的resolved configuration，不追踪SANDBOX最新版本。
+逐项显示英文Reward term、Configured weight；行展开Parameter / Value / Unit，覆盖目标值、scale、阈值等实际数值参数。
+权重0、负号、科学计数和缺值分别处理；不因penalty名称反转符号，不把禁用项悄悄删除。
+可给Disabled标记；长清单默认前6项与View all reward terms，总数明确；展开可搜索完整清单。
+不显示Raw reward、Weighted contribution、奖励实时排行或图表；配置展示不等于Reward指标回归。
+若存在Curriculum，展开该项显示初始权重、已确认的Effective weight / effective parameters、阶段和Updated at iteration。
+当前有效值只有真实课程事件/遥测支持才显示；未知写Not reported，绝不把初始值冒充当前生效值。
+无动态课程时显示固定快照值；不制造多余的Current列。
+Edit in Sandbox创建派生配置，训练中原版本只读；更新不热改现有Run。
+参数缺失、来源/默认基线与完整版本在SANDBOX可追溯，不塞到右栏形成复杂属性墙。
+
+G. Viewer
+默认Latest evaluation，注明来源checkpoint与Captured at；详情展开Scene/Seed/Playback speed。
+仅独立评估实例或录像，不渲染全部并行环境；真的实时仿真才标Live simulation。
+Camera / Fullscreen / Pause preview仅影响预览。评估命令如存在须标Evaluation only，不更改训练奖励或固定基准。
+No preview yet：Waiting for the first checkpoint；Delayed保留时间；Unavailable可Retry preview。
+Paused：Pausing the preview does not stop training. 不在该提示附加账务说明。
+新付费预览服务需要AUTH-01；已授权范围内的训练评估不重复收费确认。
+遵循第七节，无policy不造动画、无录像不冒充Live。
+
+六、运行状态、停止与成果
+
+独立后台维度仍保留，前台按职责减量：
+Job：Queued / Initializing / Running / Stopping / Completed / Stopped / Failed，在ARENA页头。
+Compute allocation：Unallocated / Allocated / In use / Returning / Returned，后台/管理员诊断，不做用户监控面板。
+Connection：Connected / Reconnecting / Stale，仅异常时简短提示。
+Post-processing：Not started / Evaluating / Exporting / Recording / Ready / Failed，在结束反馈与GALLERY显示。
+Billing：仅MASTER显示Accruing / Finalizing / Settled等，不出现在ARENA。
+
+Stop run确认：当前iteration、最近成功checkpoint、可能丢失未保存进度和受影响输出，无暂估消费。
+Stop and save仅runner支持时提供；Requested不等于Saved，崩溃时不保证最终checkpoint。
+用户确认后显示Stopping，等后端回执才显示Stopped；浏览器关闭不停止任务。
+Force stop放次级操作，说明进度丢失；不作“停止即完成结算”的承诺。
+后台授权限制/时长/iteration上限都可触发停止，保存与归还留安全余量，额度细则只在MASTER确认。
+
+故障：
+OOM说明技术原因和修改配置/换资源路径，不后台静默降低环境数。
+节点失联保留最近成功checkpoint；自动重试必须在已披露的授权范围和次数内，否则回MASTER审查，不默默新增收费任务。
+NaN/Inf醒目反馈，执行预设安全策略。监控断开时不把未知状态判成Failed。
+停止原因为目标/用户/时长/技术失败可在ARENA直接表述；授权/余额导致只呈现Stopped及Review in Master。
+
+完成：
+目标达到只代表Target reached，不等于动作质量通过。
+评估、ONNX导出、录制独立，部分失败不要求重跑全部训练；Partial training成果可保存但明确标签。
+Save to Gallery生成不可变policy version并关联source run，默认私有。
+
+成果包：
+policy.onnx                       官方导出路径，保留所需normalizer
+manifest.json                     与锁定运行时兼容的原始字段
+parameters.json或原始YAML          冻结训练/硬件/执行配置与来源，无财务字段
+media/preview.mp4                 实际录制，固定checkpoint/场景
+evaluation.json                   平台评估扩展，不伪称上游强制
+training checkpoint              可选，独立权限及真实保留策略
+bundle-index.json                 可选文件hash清单，不伪称上游强制
+
+model_api、obs_len、action_len、hw_rev、control_hz、kind、command.encoding按实际契约。
+常见feed-forward为[1,61]→[1,14]，循环策略有状态张量和model_api2，不能只验两组shape。
+Compatibility checked / Simulation evaluated / Hardware validated独立，无真机测试不标已验证。
+
+七、VIEWER-01：MuJoCo Viewer 自适应与无黑边契约（跨页共用）
+
+适用：SANDBOX New bot/Bot detail、ARENA New run/Run details、GALLERY交互Simulation。
+固定视频规则见GALLERY；不能用视频裁剪替代真实Viewer自适应。
+
+7.1 无黑边定义
+媒体viewport没有为凑比例加的黑色上下条/左右条，场景渲染填满且机器人完整、比例自然。
+阴影、深色材质不是黑边，不能抹黑/模糊背景冒充修复；禁止拉伸、裁头/脚/轮、复制边缘和假动画。
+
+7.2 模块尺寸
+Viewer为标题/状态行、viewport、工具栏三部分，只viewport参与画面尺寸计算。
+桌面主预览约360–480px高，宽填所在列；手机约240–320px；随模块和断点调整，不全站硬编码16:9。
+全屏viewport填可用区，控制栏另占空间；侧栏伸缩/缩放/双改单/工具展开/全屏后重新测量。
+隐藏/零尺寸不发送0尺寸渲染；恢复后测量。
+
+7.3 渲染与相机
+本地WebGL按CSS尺寸及合理device-pixel-ratio设置drawing buffer，更新viewport、相机投影再重绘。
+服务器帧流将目标宽高/比例传给渲染器，按相同比例生成帧，不固定源比例再拉伸。
+降分辨率仍保持比例；编码偶数尺寸偏差控制1–2px内，不造黑条。
+相机覆盖模型/脚型/道具/整段动作范围，初始安全边距约8–12%，完整性优先。
+切轮滑重新取景；前滚翻、拾取、踢球按动作范围，不能只按初始站姿。
+真实连续地面/浅灰背景填满视口，黑色清屏不是加载态；用户手动视角保留，Fit bot恢复完整取景。
+自动跟随平稳，不每帧缩放制造“呼吸”。
+
+7.4 参数与状态一致性
+换色只更新允许材质；脚型/电机可能重编译加载模型。
+当前显示版本和待应用版本分开；失败保留最后成功画面并标Previous model shown。
+快速选择以最后一次为准，旧返回帧不覆盖新选择；未连接真实MuJoCo显示Viewer unavailable。
+静态无policy为Model preview；助稳明确Stabilization assist，不能当策略表现。
+
+7.5 固定比例降级
+服务器暂不能改变比例，viewport高度按源帧比例变化，不保持冲突固定高再填黑边。
+协商期间Resizing preview并保留最后正确比例帧；这是降级，不代表后台自适应已验收。
+
+7.6 状态
+Loading model / Ready / Resizing preview / Applying hardware / Model could not load / Disconnected / Paused / Fullscreen。
+错误保留表单；断线显示Last frame at {time}不称Live；暂停只影响预览。
+全屏Esc退出、按钮可见且焦点回原控件。
+
+7.7 验收矩阵
+A. 1440×1000、1280×800、1024×768、390×844分别测试。
+B. 三种不同模块比例、侧栏折叠展开、全屏进出时渲染比例同步。
+C. 普通脚/轮滑，站立/拾取/前滚翻/踢球含球，主体与动作终点完整。
+D. 高DPI、低分辨率降级无拉伸、黑条或关键裁切。
+E. 加载失败、切换失败、断线、零尺寸恢复、旧帧迟到状态正确。
+F. Pause preview不改变Run；返回页面找到同一任务。
+G. 视频/最后帧不标Live、助稳不标policy表现。
+本轮只定义验收，不声称已运行测试。
+
+八、英文反馈与响应式
+
+Configuration is incomplete. Open it in Sandbox to finish setup.
+Selected GPU is not verified for this configuration.
+Review this request in Master to continue.
+No loss data yet.
+Loss unavailable. The training backend has not reported loss values.
+Monitoring disconnected. Your training may still be running.
+Pausing the preview does not stop training.
+Stopping the run. Waiting for checkpoint confirmation.
+Run stopped.
+Training completed, but ONNX export failed. Retry export.
+Simulation evaluated. Not hardware validated.
+
+手机顺序：任务状态/Stop → Iterations/Elapsed → Viewer → Reward configuration → Loss/Logs/Checkpoints。
+1280px缩奖励栏或堆叠，不能缩字体；小屏表格可横滚，操作/错误不遮挡。
+图表有数值替代，焦点清晰、对话框回焦点、状态文字+图标、尊重reduced motion。
+
+九、R2 验收
+
+1. 默认Loss、Logs、Checkpoints三个标签，Iterations/Elapsed只一行，没有Reward/Length曲线或冗余指标。
+2. Reward configuration能查看所有实际奖励项、权重及数值参数；课程未知值不假造，修改只能回SANDBOX。
+3. Loss为真实已解释序列，符号/缺值/gap正确；无总损失拼凑，无自动Converged。
+4. Elapsed口径固定为本Run训练活动时长，不取开页时间，不同于账单用量。
+5. ARENA所有层级（含顶栏/日志/弹窗/导出）没有财务数值、费率、预算或账单组件。
+6. AUTH-01取消不运行、确认返回不自动运行、重提交不重复Run；更改签名后重审。
+7. Stop与日志滚动/预览暂停不混淆，断线不伪称停止；授权原因只转MASTER看详情。
+8. checkpoint真实、可恢复兼容检查充分；ONNX不替代checkpoint；Viewer继续按VIEWER-01。
+
+十、关联与来源
+
+Microduck-Website-Plan-v0.2.txt
+Microduck-SANDBOX-Design-v0.1.txt
+Microduck-GALLERY-Design-v0.1.txt
+Microduck-MASTER-Design-v0.1.txt
+以上均为2026-09-26/R2；旧平行Structure草稿和R1包不作为实施基线。
+
+https://github.com/jonathanhawkins/microduck-lab
+https://github.com/pollen-robotics/microduck
+https://github.com/pollen-robotics/microduck_rl
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/pyproject.toml
+https://raw.githubusercontent.com/pollen-robotics/microduck_rl/cb70b792312d559a4da09064d92009079671815f/src/mjlab_microduck/tasks/microduck_velocity_env_cfg.py
+https://developer.nvidia.com/cuda/gpus
+https://docs.nvidia.com/cuda/blackwell-compatibility-guide/index.html
+
+待实施：真实GPU基准、runner loss/时间/课程事件适配、支付与授权/调度、Viewer尺寸协商、模型商业授权。
+本轮保留上一轮固定源码依据，不把历史开发日志当此次复验，也不声称这些页面已经实现。

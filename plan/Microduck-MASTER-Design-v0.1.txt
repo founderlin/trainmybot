@@ -1,0 +1,350 @@
+MICRODUCK — MASTER 页面设计规格 v0.1
+2026-09-26 / R2
+Account · Credits · Top-up history · Training bills
+
+文档状态
+新增 MASTER 规格，与 Website Plan v0.2、ARENA Structure v0.3、SANDBOX Design v0.1、GALLERY Design v0.1 的 R2 配套。
+交付为信息架构、文字线框、字段、交互与验收，不是已实现的支付、计费或账户系统。
+说明用中文，网站界面全部英文。正式字体 Avenir Next，布局稿 Inter Tight，数字 Regular。
+金额、兑换比例、费率、余额、支付渠道、退款/发票规则均不在此虚构；线框用语义字段而非模拟真实账务。
+
+一、目标与明确边界
+
+MASTER 是账户与所有用户可见财务信息的唯一页面入口。
+用户在这里回答：还有多少 Credits、怎样充值、每次充值是否到账、哪次训练消耗了多少、如何核对或下载记录。
+界面以清晰的余额区、轻量标签和账表为主，不做大屏式财务分析，不增加冗余KPI卡。
+
+信息架构：
+MASTER
+├─ Account
+│  ├─ Profile
+│  └─ Security & sessions
+└─ Credits
+   ├─ Overview
+   ├─ Top-up history
+   └─ Training bills
+
+Review request、Add credits、Top-up details、Bill details 是上述区域的详情/操作状态，不另设并列导航。
+R1 的 Usage / Billing 内容合并到 Credits；不再让用户在多个标签查同一笔消费。
+
+财务归属：
+• 全站余额、充值、消费、费率、预算、冻结/预占、账单、支付状态、费用确认和财务提醒只在 MASTER > Credits。
+• 全局顶栏、SANDBOX、ARENA、GALLERY 不显示 Credits 余额/角标/费用卡，也不内嵌支付或费用确认弹窗。
+• 外页可使用通用 MASTER 导航或 Review in Master 入口，不携带金额或账务状态。
+• 财务原因导致任务受阻时，外页表达“需要到MASTER审查”及当前任务状态；具体原因在此说明。
+• 技术日志留在ARENA，授权/账务事件留在MASTER，不往用户训练日志写金额、余额、供应商成本或支付凭据。
+• 财务下载只从MASTER提供，不混入GALLERY的parameters.json、manifest、checkpoint或成果bundle。
+• 供应商租赁成本由平台管理员单独管理，不直接作为终端用户账单，不对普通用户暴露密钥/地址。
+
+二、参考 OpenRouter 的范围
+
+2026-09-26 核对公开官方 FAQ 与 Activity 文档，没有访问用户账户、充值或验证登录后页面截图。
+可核实的组织方式：Credits 预充值/扣用、余额与充值入口、历史消费、按日期及维度筛选、汇总下钻到明细、按当前筛选导出。
+这些是本设计的参考，不声称OpenRouter存在机器人Training bills或本稿全部字段。
+
+转译：
+• API调用 → Run / 关联服务请求。
+• 模型/提供商等用量维度 → Bot / Task / GPU / Run。
+• 历史消费 → Training bills，以训练及相关评估/录制的计量明细追溯。
+• 保留日期筛选和列表→详情→来源路径，不复制token图表、排行榜、复杂Explorer或全套分析页。
+• 不照搬OpenRouter的美元定价、手续费、过期/退款、自动充值政策、支付渠道或税务能力。
+
+官方参考：
+https://www.openrouter.ai/docs/faq
+https://www.openrouter.ai/docs/guides/features/activity
+https://openrouter.ai/settings/credits
+https://openrouter.ai/activity
+
+三、视觉与共用组件
+
+Page #FFFFFF / Sidebar #F7F7F5 / Text #37352F / Muted #73716A / Divider #E9E9E7 / Hover #EFEFED。
+Title32 / Section18 / Body14 / Property13 / Helper≥12px，正式Avenir Next、布局Inter Tight。
+1440px：侧栏216、顶栏48、左右32、内容1160；表格填可用宽，不再加第二套固定财务侧栏。
+单行余额区、浅色分隔、标签导航；不铺渐变，不加厚阴影和巨型统计卡。
+名称/状态左对齐，Credits/金额/时长右对齐；相同精度对齐，小数显示不改变后台精度。
+主要按钮36px、触控约44px；选中标签、键盘焦点和错误同时靠文字/形状区分，不只靠红绿。
+
+金额规则：
+• Credits 是平台账户单位，统一写 Credits，不给它加¥或$；不默认为1 Credit=1元。
+• 货币单列 Amount / Currency；如支付业务确认人民币，显示¥并标CNY。业务未确认前显示实际返回币种，不能静默换算。
+• 多币种充值不能直接求和为一个总金额；可按币种汇总，Credits到账总量另计。
+• 减少/退款/调整保留方向和说明；最终金额以账本/支付记录为准，不由前端四舍五入回算。
+• 列表统一账务时区并显示时区；日期筛选边界一致，原始时间可在详情查看。
+
+四、M-01 Account
+
+页内标签 Account / Credits，默认首次进入可为Account，回访恢复上次标签；财务跳转直接定位Credits。
+Profile：Display name、Email及真实验证状态、Account ID（复制）、Save changes。
+Security & sessions：实际支持的登录方式、会话设备/最近活动、Revoke session、Sign out。
+安全操作需重新验证时明确提示；未接入的2FA/登录方式不画成可用。
+退出不停止后台训练；有活动任务时提示 You have active training runs，不显示财务摘要。
+注销账户不作为首版默认主动作；如以后支持需单独处理活动任务、数据保留和账务义务。
+不在Account复制余额/充值组件，相关链接去Credits。
+
+五、M-02 Credits / Overview
+
+┌─────────────┬──────────────────────────────────────────────────────────┐
+│ Microduck   │ MASTER                                                   │
+│ SANDBOX     │ Account    Credits                                       │
+│ ARENA       │ Credits                                      Add credits │
+│ GALLERY     │ Available credits   [actual balance]                     │
+│             │ Updated at [time]                                       │
+│             ├──────────────────────────────────────────────────────────┤
+│             │ Overview   Top-up history   Training bills              │
+│             │                                                          │
+│             │ Requests requiring review                               │
+│             │ Request / Source / Status                    Review     │
+│             │                                                          │
+│             │ Spending summary                  Date range / Timezone │
+│             │ Settled usage      [actual credits]                     │
+│             │ Pending usage      [estimate, separate from settled]    │
+│             │                                                          │
+│ MASTER      │ Spending controls                                       │
+│             │ Default run limit / Low balance notification            │
+└─────────────┴──────────────────────────────────────────────────────────┘
+中括号是字段占位，不填虚构余额。无待审请求时整段省略，不保留空卡。
+
+余额：
+Available credits必须由账本/额度服务直接给出；数据未载入显示Loading，失败显示Balance unavailable / Retry，不显示0。
+账本若支持预占，才增加Reserved只读行及说明；预占不等于消费，释放也不等于充值。
+若不采用预占，启动时必须原子校验并发授权/额度，不能两份任务各自使用同一可用余额而不受控。
+Available的计算语义由账本确定，不由UI简单“累计充值减历史账单”推导，避免忽略预占、退款、调整和未结算消费。
+
+消费摘要：
+最多两个紧凑属性：Settled usage / Pending usage，按明确日期范围，不画大KPI阵列。
+Pending为暂估且标Updated at；不得与同笔已结算金额重复汇总。
+点击摘要进入Training bills，携带日期和相应状态筛选。
+不默认增加消费趋势图或GPU排行；用户本次要充值历史和训练bill，不扩张为分析大屏。
+
+Spending controls：
+Default run limit为后续请求的建议上限，不自动改变已有Run的授权。
+Low balance notification配置如可用，仅在MASTER呈现财务提醒；外页不出现余额toast。
+Auto top-up为可选能力，首版支付服务未确认时不画开关；若接入，默认Off，需要单独授权、触发阈值、每次金额及周期上限。
+自动充值支付失败不能无限重试，也不能因用户确认训练就替用户启用自动充值。
+活动Run的Change limit在MASTER按授权详情进入，确认后留痕；不在ARENA修改预算。
+
+六、M-03 Add credits 与 Top-up history
+
+Add credits面板仅在MASTER内打开：
+Amount（支付金额/币种）→ Credits to receive → 可用Payment method → 费用/税费明细（确有时）→ Total → Pay。
+只展示当前支付服务真实支持的方法；支付渠道未确认，不预写支持某钱包、信用卡或加密货币。
+兑换比例、最低充值、手续费、税费和条款在支付前明示；未知时不可提供可付费确认。
+若优惠或赠送真实存在，区分Purchased / Promotional及适用规则；未定义不加赠送标签。
+进入支付/关闭弹窗/支付返回不等于到账；以支付回执+账本入账为准。
+刷新/回调重复不重复加Credits。付款结果未知先查原订单，不能引导立刻再付同笔。
+已付款未入账显示Payment received. Credits are being added.，提供订单号和核对入口，不要求盲目重付。
+失败保留订单记录与可重试条件；退款须依据已确认政策，不能承诺“随时退款”。
+
+Top-up history：
+┌───────────────────────────────────────────────────────────────────────┐
+│ Credits                                              Add credits      │
+│ Overview   Top-up history   Training bills                             │
+│ Date range    Status    Search order                        Export    │
+├────────────┬──────────────┬─────────────┬─────────────┬─────────────────┤
+│ Date       │ Order        │ Amount      │ Credits     │ Status          │
+│ [time]     │ [order ID]   │ [currency]  │ [posted]    │ [actual state]  │
+├────────────┴──────────────┴─────────────┴─────────────┴─────────────────┤
+│ Pagination / Result count                                             │
+└───────────────────────────────────────────────────────────────────────┘
+主表五列，支付方式和收据放行详情，不挤占首屏。
+
+字段定义：
+Date：订单创建时间，详情另列paid_at / credited_at / refunded_at。
+Order：平台稳定订单号，可复制；支付渠道参考号在详情，不用其敏感值作公开URL。
+Amount：实际支付金额及币种；退款部分和已退金额在详情，不覆盖原付款额。
+Credits：实际到账量，未到账为“—”，不是承诺数量或0；详情区分Purchased / Credited / Reversed（若有）。
+Status：组合展示实际进度，不把Payment successful当成Credits added。
+
+状态：Pending payment / Processing / Credits added / Failed / Cancelled / Refund pending / Partially refunded / Refunded。
+付款成功但入账处理中为Processing，详情明确Payment received；无需把每种内部状态单独变成彩色标签。
+充值订单失败、取消或部分退款仍可查，不删除让账务“看起来干净”。
+日期、状态、订单搜索可组合；空状态No top-ups yet / No top-ups match these filters。
+
+Top-up details：
+Order ID、Payment amount / Currency、费用与税费（确有）、Credits purchased/added/reversed、状态时间线、脱敏支付方式。
+Receipt仅实际可获取时显示Download receipt；税务发票需本平台真实能力和抬头流程，不用Receipt替代Invoice。
+Report an issue携带订单ID，用户不必提供完整卡号或凭据。
+Export按当前过滤导出订单记录，付款币种与Credits分列；不是自动下载所有历史。
+
+七、M-04 Training bills
+
+训练bill是平台服务消费明细，不是再次付款的应付账单。
+使用预充值Credits扣用模式：不在每张训练bill上画Pay bill按钮，也不把充值订单重复计为训练消费。
+
+┌───────────────────────────────────────────────────────────────────────┐
+│ Credits                                                               │
+│ Overview   Top-up history   Training bills                             │
+│ Date range  Run/Bot  GPU  Status  Service type               Export    │
+│ Settled usage [credits]          Pending usage [credits]               │
+├────────────┬────────────────┬───────────┬──────────┬───────────────────┤
+│ Date       │ Run / Service  │ Usage     │ Credits  │ Status            │
+│ [time]     │ [source name]  │ [unit]    │ [actual] │ [actual state]    │
+├────────────┴────────────────┴───────────┴──────────┴───────────────────┤
+│ Pagination / Result count                                             │
+└───────────────────────────────────────────────────────────────────────┘
+GPU、Bot、Bill ID、任务类型和原始Run ID在行详情/筛选中查，不为每个字段增列。
+
+列表字段：
+Date：此bill首个计量区间起点；详情显示全部起止和结算时间。尚无计量使用创建时间并标明。
+Run / Service：Run name为主，服务种类为副标题；Open bill进入MASTER明细，Open run另跳ARENA。
+Usage：同单位计量量，例如小时；不同单位写Multiple items，不把时长/次数/存储量直接相加。
+Credits：本bill目前净消费值，明确Pending或Settled；补偿/更正另列追溯，金额不是供应商成本。
+Status：Accruing / Finalizing / Settled / Under review；更正以Adjusted标记或明细说明，保留基础状态。
+任务Running/Completed和账务状态不是一列：后台任务完成时账单仍可能Finalizing。
+没有收费事件的草稿/取消授权不生成伪造消费；技术初始化失败也不能自动假定费用为0，依已披露条款。
+
+账单归属：
+• 每次已执行的Run形成一个Training bill聚合其训练及启动前已授权的评估/导出/录制条目。
+• 同一授权范围内的服务不能训练账单计一次、GALLERY再计一次。
+• 训练后新发起的录制/评估/仿真请求有独立Request ID及授权，形成关联服务bill，显示Service type和Source run/result。
+• 尚无Run的独立模型预览如确需付费，以Service request作为主体，Run显示Not applicable，不造虚拟训练记录；仍收在此消费表，类型明确。
+• 执行期同一Run重试可用attempt条目追溯；用户显式Resume创建新Run、新授权、新bill，旧消费不复制。
+• 已结算bill不因新服务而悄悄追加；补记/更正采用可追溯调整条目，原记录保留。
+• 平台空闲租赁成本不自动归入上一位用户；仅按已披露且已授权的服务区间计量。
+
+筛选与汇总：
+Date range / Run or Bot / GPU / Billing status / Service type；按Bill ID或Run ID可搜索。
+从Overview下钻保留日期/状态，Open run后返回恢复列表筛选和滚动位置。
+列表Date筛选按上述起点；页头摘要只汇总匹配bill的当前净值，不声称“该自然日内实际发生的全部消费”。
+若以后支持按消费发生日统计，必须按计量条目切分跨日Run，另标统计口径，不能把全部账单硬归结算日。
+Pending与Settled分开，列表分页不得只汇总当前页并伪称全范围合计。
+列表/导出取同一快照时间，展示Updated at；结算延迟不回填0。
+
+八、M-05 Bill details
+
+面包屑 MASTER / Credits / Training bills / Bill ID；标题用Run或Service name。
+页头：账务状态、Net credits、Open run或Open result、Export details。
+
+Summary：
+Bill ID / Run ID或Request ID / Bot & configuration / GPU profile / Billing period / Timezone。
+Authorization reference / Rate version / Settled at（真实完成时才有）/ Last updated。
+任务状态与账务状态分开标识，来自不同来源；不因看到Completed就隐藏暂估说明。
+
+Usage items紧凑表：
+Service | Billable interval / Quantity | Unit | Rate | Credits | Status
+Training、Initialization、Evaluation、Recording、Storage等仅在实际收费范围明确且有事件时出现。
+未实际收费的服务不得自动补成账单项目；未定义规则不能先收费再说明。
+按每个服务项目的计量数量与锁定费率计算，列出计量粒度/舍入/最低计量单位（确有才显示）。
+区间起止由服务端事实给出；ARENA Elapsed是训练活动时长，不能直接复制成账单用量。
+费率变化若允许分段则各段保存已同意的rate version；未经重新确认不能对既有授权静默涨价。
+账本高精度计算，展示舍入不反写；细项之和与总值不符需给出明确的Rounding adjustment（真实存在时）。
+
+Adjustments / events（按需展开）：
+原始消费、更正/返还、原因、关联账本事件和发生时间，保留符号与前后值，不覆盖历史。
+取消预占不是退款，不算新增充值；补偿Credits与原付款退款分开。
+账单处于Under review仍保留原值和争议标识，不能将争议自动写成已退款。
+
+下载与问题反馈：
+Export details导出当前bill明细；只有Settled才可作为最终消费记录，暂估导出明确Provisional及生成时间。
+Download receipt/Invoice只在本平台实际提供相应文件时出现；Training bill不是默认税务发票。
+Report an issue自动带Bill ID/Run ID和选中条目，普通用户看不到供应商原账单或管理员成本。
+对象归档/删除后保留必要名称快照与不可变ID；无权访问原Run不等于可以跨用户查看账单。
+
+九、AUTH-01：付费请求审查与返回
+
+目的：所有费用知情确认在MASTER，同时避免“点确认就启动”“导航回来自动扣费”或无上限后台运行。
+首版不提供隐式全账户无限授权；每个执行请求有绑定范围，已有效授权同一草稿可以直接返回执行，不反复打断。
+
+M-06 Review request：
+┌───────────────────────────────────────────────────────────────────────┐
+│ MASTER / Credits / Review request                                     │
+│ Review request                                                        │
+│ Source          [Run draft / Result / Preview request]                │
+│ Configuration   [fixed version]     GPU [selected profile]             │
+│ Services        [training and selected post-processing]               │
+│ Rate            [actual rate / unit / version]                         │
+│ Available credits [ledger value]                                      │
+│ Request limit   [user-confirmed Credits cap]                           │
+│ Maximum runtime [read-only service deadline]                               │
+│ Billing terms   [start / end / granularity / stop conditions]          │
+│ Estimate        [only if supported by a stated basis]                 │
+│                                                                       │
+│ This confirms the request. It does not start the service.              │
+│ Cancel                                            Confirm and return  │
+└───────────────────────────────────────────────────────────────────────┘
+本页只审查财务和请求范围，不在此改Rewards/PPO；修改训练参数返回SANDBOX，修改资源/时长返回原请求页。
+Maximum runtime沿用ARENA定义：首次分配执行资源起，覆盖初始化、训练、已选后处理与其间自动重试等待；首次分配前排队除外，重试不重置。到期停止请求、取消未启动阶段，清理耗时可另记；不是ARENA Elapsed，也不是计费量。独立仿真/录制请求同样需有限时长或明确有限工作量，不能仅有一份无期限运行的授权。
+
+流程：
+1. ARENA/GALLERY/SANDBOX保存请求草稿，带请求ID、来源对象/版本和返回上下文进入MASTER。
+2. 本页核对用户身份、权限、请求签名、当前可用额度及已验证费率；显示服务项目、总授权上限及停止条件。
+3. 没有有效费率、费用范围或关键计费条件时禁用Confirm and return，禁止用“稍后结算”绕过知情确认。
+4. Confirm and return记录用户同意及固定签名，不分配GPU、不扣服务费；首版也不在此阶段预占资金。
+5. 确认后返回原页：训练回ARENA草稿，结果服务回GALLERY原版本，模型预览回SANDBOX原上下文。返回链接按来源显示Return to run / Return to result / Return to bot。
+6. 用户在原页再点击Start training / Start simulation / Run evaluation / Generate recording或相应预览开始控件。
+7. 后端在执行提交时原子校验授权和实时额度；若采用预占，预占此时开始并在MASTER显示，不由前端自行扣减。
+8. 配置版本、GPU、源checkpoint、输出服务范围、最高时长或适用费率等签名字段变化，原授权失效，需重新审查。未改变签名的命名/展示文字变化无需重审。
+9. 授权有效期按实际业务给出，不编造默认分钟数；过期或额度不足时原页只给Review in Master，MASTER解释具体原因。
+10. 双击/超时/重连用同一请求ID核对，不重复Run/服务请求/预占或扣费。可重试前先确认原请求未成功。
+11. 取消审查或离开不启动新任务；返回仍保留草稿。确认后未执行可撤销未使用授权，不产生消费。
+12. 训练流程内预先授权的后处理由该Run编排执行，不要求用户在GALLERY再点一次；新请求另授权，不能重复扣费。
+
+上限和安全停止：
+Request limit覆盖本请求已选择的收费服务，包括哪些阶段必须在确认页明示，不默认只约束训练主体。
+用户可扣Credits的硬边界是已确认Request limit，所有服务条目合计不得超过该上限；未经用户在MASTER重新授权不得增加。
+后端应在上限内预留保存/释放等计量余量并提前停止。供应商实际成本可能超过平台预估，但超出已授权上限的部分由平台承担，不能转嫁给用户。
+如当前供应商/调度/账本组合不能守住用户扣费上限，该组合禁止付费执行，不得仅改称“软上限”继续运行。物理资源释放能否精确准时是另一项待验证能力，不改变用户授权边界。
+余额不足、授权上限、时间或迭代目标均可能使训练停止，服务状态在ARENA，财务原因和明细在MASTER。
+活动Run调整上限在MASTER确认并留存版本，不可低于已发生/承诺消费与必要停止余量；返回成功不等于可撤销历史消费。
+Stop请求之后的计量截止以事先披露的后端事件为准；资源归还、结算延迟可在bill中追溯。
+自动重试次数/可计费阶段需纳入授权；超范围应停下等待新审查，不默默无限重试。
+
+十、状态、权限、导出与可访问性
+
+英文反馈：
+Balance unavailable. Retry to load your credits.
+No top-ups yet. Add credits to get started.
+No training bills yet. Bills appear when an authorized service records usage.
+Payment received. Credits are being added.
+Your payment status is still being checked. Do not pay again yet.
+Not enough credits for this request. Add credits or change the limit.
+Pricing is unavailable. This request cannot be confirmed yet.
+This request has changed. Review the updated details.
+Request confirmed. Return to continue.
+Final usage is being calculated.
+No bills match these filters. Clear filters.
+
+权限：只可查看自身账户账务和授权；管理员管理费率/成本不能让普通用户越权读其他用户bill。
+付款资料脱敏，导出不含完整卡号、支付密钥、供应商凭据。对象ID可复制但不能当访问授权。
+所有导出尊重当前筛选、时区、单位和快照时间；大数据导出明确All matching records，不只导出当前页却误标完整。
+CSV是后续产品导出能力规格，本轮不生成真实CSV账表；记录需包含稳定ID、币种、Credits、状态、计量/更新时间。
+保留期和删除规则待业务确定，不填30天/永久等假默认值。
+
+响应式：
+1280/1024表格保留关键五列，次要字段行展开；390px可横滚或转紧凑记录行，订单/Run与状态必须可见。
+点击整行进入详情时，复制/下载/Open run不冒泡；键盘可独立访问并回焦点。
+页面加载不闪0余额、失败不展示空历史误导；金额对齐且有单位，状态不用颜色单独表达。
+日期控件有时区说明，读屏能识别列头、暂估和已结算；尊重reduced motion。
+
+十一、验收清单
+
+1. 只在MASTER > Credits出现所有财务值与确认，其他页仅中性导航/请求审查入口。
+2. Credits具有Overview / Top-up history / Training bills，充值与消费不会混成一张无类型流水。
+3. 支付成功未到账有Processing状态；重复回调不重复入账，未知状态不盲目重付。
+4. 充值金额/币种与Credits分列，多币种不直接相加；收据/账单/发票不混称。
+5. bill关联准确Run/Request/Result，归档后有来源快照；独立预览不虚构Run。
+6. Accruing/Finalizing/Settled与训练Running/Completed独立，暂估和结算不重复汇总。
+7. 已授权后处理不重复授权/执行/扣费，新服务单独关联账单，已结算记录不静默追加。
+8. AUTH-01审查/确认/返回都不自动运行；取消不扣服务费，修改签名须重审。
+9. 并发请求在执行时校验额度；预占如有独立展示/释放，不算充值或消费。
+10. 费率版本、计量区间/单位/舍入、授权范围、调整原因可追溯，不直接复制ARENA Elapsed为费用。
+11. 导出与筛选快照一致，不泄漏支付/供应商秘密；财务文件不混入GALLERY成果包。
+12. 空/错/处理中状态完整，不造余额、费率、付款支持或退款承诺；未定业务能力不画假按钮。
+13. 模型资产授权、真实GPU/镜像准入未完成不能因余额充足放行训练。
+14. 没有未授权自动充值、无限重试或未披露后处理收费。
+
+十二、实施前需确定与交付范围
+
+待确定：Credits换算、币种/支付方式、到账时限、手续费/税费、退款和税务发票能力。
+待确定：服务费率/版本、计量起止/粒度、排队/初始化/重试/录制/存储规则、上限与停止余量。
+待确定：预占模式、授权有效期、账本幂等及对账、异常补偿、保留期和自动充值支持。
+所有上述内容为正式启用收费前的条件，不是要求本轮在TXT中自行决定商业政策。
+
+配套：
+Microduck-Website-Plan-v0.2.txt
+Microduck-ARENA-Structure-v0.3.txt
+Microduck-SANDBOX-Design-v0.1.txt
+Microduck-GALLERY-Design-v0.1.txt
+Microduck-MASTER-Design-v0.1.txt
+五份文件统一2026-09-26/R2；以Microduck-Design-Specs-R2.zip为本轮完整交付包。
+本轮只交付设计规格，没有真实充值、扣费、支付接入或网站实现。

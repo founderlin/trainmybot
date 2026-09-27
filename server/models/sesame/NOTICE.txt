@@ -1,0 +1,13 @@
+Preview meshes derived from dorianborian/sesame-robot
+(https://github.com/dorianborian/sesame-robot).
+
+- Source: hardware/cad/Sesame-ESP32-v122.step (Apache License 2.0).
+- parts/*.stl are a tessellation of that STEP assembly (linear deflection
+  0.35 mm), split by CAD colour and converted to metres. The colours are
+  the diffuse colours from the STEP file.
+- The repository does not publish joint frames, so the preview shows the
+  assembled CAD pose rather than eight separate actuated joints.
+- scene_viewer.xml adds the MuJoCo preview floor, sky, and light, and
+  places the assembly on the floor.
+
+License: Apache License 2.0. See the upstream LICENSE.

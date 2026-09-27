@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>trainmybot</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <a class="brand" href="#/gallery" aria-label="trainmybot">
+      <img src="assets/logo.png" alt="trainmybot" width="988" height="220">
+    </a>
+    <nav class="nav-main" aria-label="Main">
+      <a class="nav-item" data-nav="gallery" href="#/gallery">
+        <span class="nav-label">GALLERY</span>
+        <span class="nav-desc">Bots and configurations</span>
+      </a>
+      <a class="nav-item" data-nav="arena" href="#/arena">
+        <span class="nav-label">ARENA</span>
+        <span class="nav-desc">Training runs</span>
+      </a>
+      <a class="nav-item" data-nav="playyard" href="#/playyard">
+        <span class="nav-label">PLAYYARD</span>
+        <span class="nav-desc">Place robots and policies</span>
+      </a>
+    </nav>
+    <nav class="nav-bottom" aria-label="Account">
+      <a class="nav-item" data-nav="master" href="#/master">
+        <span class="nav-label">MASTER</span>
+        <span class="nav-desc">Account and credits</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div id="main">
+    <header id="topbar">
+      <div id="breadcrumb" class="breadcrumb"></div>
+      <button id="account-btn" class="btn btn-sm btn-ghost" type="button">Account</button>
+    </header>
+    <main id="view"></main>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" aria-live="polite"></div>
+
+<script src="js/data.js?v=20260927c"></script>
+<script src="js/ui.js?v=20260927c"></script>
+<script src="js/pages-sandbox.js?v=20260927c"></script>
+<script src="js/pages-arena.js?v=20260927c"></script>
+<script src="js/pages-gallery.js?v=20260927c"></script>
+<script src="js/pages-playyard.js?v=20260927c"></script>
+<script src="js/pages-master.js?v=20260927c"></script>
+<script src="js/app.js?v=20260927c"></script>
+</body>
+</html>

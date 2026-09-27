@@ -1,0 +1,249 @@
+MICRODUCK — GALLERY 页面设计规格 v0.1
+2026-09-26 / R2
+对应：Website Plan v0.2 R2、ARENA Structure v0.3 R2、SANDBOX Design v0.1 R2、MASTER Design v0.1 R2（Microduck-MASTER-Design-v0.1.txt）；五份权威文件统一为2026-09-26 / R2。
+交付性质：信息架构、页面线框、组件、交互与验收规格；不是已完成画布或网站代码。
+界面英文；布局稿Inter Tight，正式产品目标Avenir Next。完全复用全站颜色、字号、按钮和间距。
+
+一、设计定位
+
+GALLERY是策略成果的橱窗，不是传统网盘，也不是默认公开社区。
+用户通过动作预览识别成果，再看Bot、版本、评估和文件，决定查看、下载或创建新配置。
+SANDBOX橱窗展示“我的Bot”；GALLERY橱窗展示“某个Bot产出的某个策略版本”。两者视觉一致，但对象与主操作不同。
+默认私有成果，只展示有访问权限的条目。
+
+二、参考页面：借鉴布局，不复制业务或视觉
+
+用户参考：
+https://huggingface.co/spaces/pollen-robotics/microduck-policy-playground
+本次从Space API确定应用host与固定revision，读取index.html核对结构；未做登录/连接真机测试，也未宣称浏览器像素级还原。
+Space revision：11e94f2b8c68c2b73008d16b3d451367770b9cb1。
+
+实际源码结构：单列页面顶部工具栏 → 已安装动作区 → 获取动作的卡片网格 → 基础运动策略折叠区 → 日志。
+卡片内容：可选视频、名称、说明、时长/来源等标签、主要操作；grid为auto-fill minmax(250px,1fr)，gap14px。
+原页面的搜索为后台固定检索，不等于有用户搜索框；没有模型换色、普通脚/轮滑选择或3D Viewer。
+原页面涉及连接真实机器人、安装和执行策略，不能把这些直接搬到本平台成果页。
+
+采用：
+• 预览优先的动作卡片网格。
+• 名称、说明、少量关键属性、清晰单个主操作的阅读顺序。
+• 不依赖视频也能识别动作的文本信息。
+
+不采用：
+• 黄色主按钮、16px大圆角、17px全站正文。
+• 未请求的登录HF、连接真机、Put it on my duck、Start it/Stop等真机控制。
+• 将基础动作默认折叠而导致用户误以为不存在。
+• 未授权跨社区抓取并混入用户私有成果。
+本平台新增Search/Filter为明确的产品设计，不宣称上游已有。
+
+三、G-01 主界面：Policy showcase
+
+页面头：GALLERY；说明Your trained policies and recordings。
+默认范围：My results。次级来源入口Official references为可选明确入口，不将官方ONNX冒充用户训练成果；首版可只提供“Browse templates in Sandbox”链接。
+主要入口不是Create policy（GALLERY不训练），空状态引导Go to Arena；已有成果时主操作在卡片内为Open result。
+
+┌────────────┬─────────────────────────────────────────────────────────┐
+│ SANDBOX    │ GALLERY                               My results         │
+│ ARENA      │ Your trained policies and recordings                    │
+│ GALLERY    │ Search results   Bot   Action   Foot type   Status  Sort │
+│            ├─────────────────┬─────────────────┬─────────────────────┤
+│            │ Video / poster  │ Video / poster  │ Model poster        │
+│            │ Preview         │ Preview         │ No recording        │
+│            │ Walking baseline│ Left kick       │ Roller crouch       │
+│            │ Bot / Version   │ Bot / Version   │ Bot / Version       │
+│            │ Eval status     │ Eval status     │ Eval pending        │
+│            │ ONNX Params Video│ONNX Params Video│ONNX Params          │
+│            │ Open result     │ Open result     │ Open result         │
+│ MASTER     └─────────────────┴─────────────────┴─────────────────────┤
+│            │ Load more                                               │
+└────────────┴─────────────────────────────────────────────────────────┘
+名称仅为线框示意，不代表真实用户记录或评估结果。
+
+A. 工具栏
+Search results：搜名称、Bot、动作、版本；不通过实时服务器内容填充假结果。
+Bot：可多选。Action：按SANDBOX真实配置来源筛选，左右踢球独立。
+Foot type：Standard feet / Roller skates。
+Status：Export ready / Evaluation pending / Evaluation failed / Partial training。
+Has video：可选，缺视频成果不被默认排除。
+Sort：Newest / Last updated / Name；不默认按reward跨任务排名。
+用户配置了同一评估协议的对比后才可显示可比指标排序，并注明单位/协议。
+筛选有计数、清除按钮，空结果不会误导为没有成果。
+返回列表时保留筛选、排序、滚动位置和已展开版本。
+
+B. 橱窗卡片
+媒体区：默认16:9视频poster，浅中性背景；无视频使用产出时Bot模型海报，明确No recording。
+标题：用户命名成果16px Medium，最多2行；副说明14px，长文本进入详情阅读。
+属性：Bot、Action、Version、Foot type、Created，重要信息可见，其他放详情。
+状态：Simulation evaluation与Hardware validation分开；没有真机测试始终Not hardware validated。
+文件能力：ONNX / Parameters / Video / Checkpoint按实际文件存在与验证状态显示，不虚构可下载按钮。
+主操作Open result；Preview为媒体内独立控制，Download菜单作为次级操作。
+整卡点击进入详情，Preview/Download/更多菜单不触发导航，键盘可独立访问。
+卡片缩略图必须反映来源Bot的hardware/appearance snapshot，不能随当前Bot配色修改而悄悄改变历史成果。
+
+版本聚合：同一结果系列默认一个卡片，展示Latest version并可展开历史版本；文件内保留不可变artifact/version ID。
+“最新”是按创建顺序，不等于“最佳”；只有评估器支持才用Best标记。
+训练未达目标仍有可用策略时标Partial training，不丢弃成果也不标Completed target。
+官方引用与用户产出若将来同屏，必须有Official reference / My training标签及独立来源过滤，不称下载官方策略就是用户训练。
+
+C. 网格和加载
+1440基准内容1160px，3列376px、间隔16px；宽屏可4列但卡片正文与按钮字号不变。
+按有效内容宽自适应3/2/1列，最小卡片宽约300px；移动端单列。
+媒体高宽比固定的仅是列表封面；详情根据源比例灵活，禁止把视频硬塞导致黑边。
+默认海报静态，点击Preview才播放；一次只播一个，静音、字幕/文本摘要可见，离开视口暂停。
+respect reduced motion，不能hover就自动响声音或启动GPU评估。
+缩略图懒加载，使用分页或Load more；列表不启动每卡一个MuJoCo实例。
+
+四、G-02 成果详情：Policy result
+
+完整页面：页头与操作 → 预览+来源属性 → 标签Files / Evaluation / Configuration / Versions。
+
+┌────────────┬─────────────────────────────────────────────────────────┐
+│ SANDBOX    │ GALLERY / Walking baseline                              │
+│ ARENA      │ Walking baseline                   Download bundle      │
+│ GALLERY    │ Version / Private / Export status                       │
+│            ├──────────────────────────────────┬──────────────────────┤
+│            │ Recording / Simulation           │ Source               │
+│            │                                  │ Bot / Hardware rev   │
+│            │ Full model and action visible    │ Configuration version│
+│            │                                  │ Action / Run         │
+│            │ Play / Fit model / Fullscreen    │ Model API / Foot type│
+│            │ Captured at / Checkpoint         │ Validation           │
+│            ├──────────────────────────────────┴──────────────────────┤
+│            │ Files   Evaluation   Configuration   Versions           │
+│            │ Name            Type       Size      Status   Download │
+│            │ policy.onnx     Policy     …         Ready             │
+│            │ parameters.json Config     …         Ready             │
+│            │ manifest.json   Metadata   …         Ready             │
+│ MASTER     │ preview.mp4     Video      …         Not generated     │
+└────────────┴─────────────────────────────────────────────────────────┘
+
+A. 预览
+Recording：优先播放实际生成的media/preview.mp4；显示Captured at、Scene、Seed、Source checkpoint、Playback speed。
+Simulation：只有可加载模型、策略、适配器及所需资源权限/有效授权齐备才允许Start simulation；否则解释模型或兼容性问题，需审查的请求提供Review in Master，不用动图模拟3D交互。
+需要云资源的Simulation、评估和录制遵循下方MASTER授权往返流程；GALLERY不展示费率、预算或页内费用确认，打开页面、准备请求或返回页面均不自动启动资源。
+没有模型或策略只能Model preview；受外力支撑时必须Stabilization assist；视频绝不标Live simulation。
+Camera、Fit model只在真实交互Viewer中出现，普通视频中不放无效Orbit控件。
+所有模式遵循ARENA文档VIEWER-01：渲染区填满模块、相机aspect更新、完整动作可见，无黑边不拉伸。
+
+MASTER授权往返（Simulation / Evaluation / Recording共用）：
+1. 用户在原成果页选择准备动作；需要新增收费或超出原授权范围时，准备入口使用Review in Master，保留result/version、checkpoint、当前标签、模式及本次请求设置后前往MASTER > Credits > Review request。准备操作本身不执行任务。
+2. 只有MASTER披露Credits、余额、预算、费率、账单、金额、收费规则及付费确认/财务提醒，并由用户授权。GALLERY包括顶栏、弹窗和Toast在内均不展示这些内容或billing提示；授权往返入口/返回提示只用Review in Master / Return to result等中性文案，不附财务数值。
+3. 在MASTER点击Confirm and return后恢复原成果页和准备上下文；若导航中断，可用Return to result返回。仍由用户再次点击Start simulation / Run evaluation / Generate recording才执行对应任务。授权成功、导航返回、刷新页面均不自动启动。
+4. 取消审查返回原页，保留上下文、不扣费、不启动任务；用户可以继续查看结果。
+5. 没有新收费的已有录像回放和已有文件下载不触发此流程。已授权且在范围内的训练后处理沿用原授权，不重复请求；不得重复启动已在原训练流程中提交的后处理。
+6. 新增收费、授权失效或任一AUTH-01签名字段变化（源版本/checkpoint、配置、资源、输出服务、最高时长、费率）时，执行前重新去MASTER审查；即使预计同价或更便宜也不能沿用不同签名的旧授权。纯展示名称变化无需重审。GALLERY新发起的执行仍由用户显式点击对应开始按钮。
+
+比例处理：
+优先生成匹配橱窗的无黑边视频封面；详情按实际视频比例调整媒体区高度，工具栏外置。
+旧视频内嵌黑条不能靠拉伸或裁主体解决，保留完整视频并提示源问题，提供后续重新录制入口。
+没有视频显示真实模型poster加No recording；不是空黑屏，也不展示另一动作的片段。
+
+B. 来源属性
+Bot name、Bot revision、Appearance revision、Hardware revision、Configuration/version、Action、Source run、GPU profile、Finished at、Policy source repo/revision。
+官方template来源和本次训练产物来源分开，避免把自定义结果重新标为官方。
+Open source run到ARENA；Open bot到SANDBOX，并展示对应版本。
+当前Bot已更新时显示This result uses an earlier hardware revision，可查看差异而不改写结果。
+Compatibility check、Simulation evaluation、Hardware validation独立展示。
+训练参数与真机部署是不同环节，不出现默认Ready to deploy按钮。
+
+C. Files
+表格列Name / Type / Size / Validation / Download；显示实际文件，不画固定“全部成功”的四个图标。
+文件规范：
+policy.onnx：官方安全导出路径，包含所需归一化。
+manifest.json：沿用兼容的官方schema。导入的官方原件与其revision作为只读来源快照保留；新成果的kind、command.encoding、slot、duration、model_api及产物来源等已知字段必须反映本版本实际生效的执行参数、模型接口与真实来源，不盲目复制旧值。未知字段在兼容性审核后透传；保留来源快照不等于用旧manifest描述新策略。
+parameters.json或原始配置：仅包含用于可复现实验的训练/执行/硬件/计算资源快照，包括冻结的Configuration、模板基线与用户配置override、实际解析后的effective configuration、非财务计算资源设置、motor/hardware revision、默认值来源及source hashes；排除财务预算、费率、余额、账单、金额、支付/授权凭据及其他凭据。未经解析或采集的effective值标Not reported，不以默认值冒充。训练参数只在SANDBOX修改，ARENA首版没有第二套训练参数override编辑器。
+media/preview.mp4：实际录像，有长度/分辨率/比例；未生成可准备录制，需要审查时先Review in Master，授权后返回由用户点击Generate recording；原授权已覆盖的训练后处理不重复授权。
+evaluation.json：协议、种子、样本数、指标与版本；平台扩展，不称官方强制字段。
+checkpoint：可选，显示兼容及保留状态；ONNX不能代替训练状态。
+
+Download bundle：包含当前版本实际可用的非财务成果文件与bundle文件清单，列出missing/not-generated项；不得借原始配置、manifest、文件清单或其他附件夹带财务字段/凭据。财务文件仅在MASTER > Credits下载，不列入GALLERY Files、单文件下载或bundle。
+若缺ONNX，不能仍称Full policy bundle；界面可显示Download available files并说明缺项。
+下载不触发训练、录制或付费资源；生成缺失成果是独立操作。
+校验失败文件标Failed validation，不能用普通绿色Ready标签；原始下载如允许，需明确警告其不可用性。
+文件大小/校验/过期以真实数据为准，不造示例即假装产物存在。
+
+D. Evaluation
+按任务展示真实指标与协议：速度跟踪、跌倒率、恢复成功/时间、动作特定指标。
+无评估显示Not evaluated；无需新增审查时可Run evaluation，需要云资源且未被原授权覆盖时先Review in Master，授权返回后再由用户点击Run evaluation。不以reward推断成功。
+ARENA训练信息口径为Iterations、Elapsed、Loss、Logs、Checkpoints；原Metrics(Reward/Length)实为Loss，原los实为Logs，另只读呈现奖励参数配置。Loss不等于动作质量，不能据其下降标注动作成功；真实动作评估继续在GALLERY，Logs是日志而非第二个损失指标。
+跨版本对比只有相同hardware、task、scene、seed集合和协议才默认可比；不符合时显示Not directly comparable。
+不能把不同动作的Episode reward当统一质量分；真实评估报告中的reward若存在，保留其协议与来源，但不用于恢复ARENA的Metrics(Reward/Length)栏目。
+失败评估保留日志与来源，重新评估生成新报告版本，不覆盖旧证据。
+
+E. Configuration与Versions
+只读展示导出时的训练/执行参数，使用SANDBOX同一字段schema和单位；Rewards来自创建Run时已保存配置的只读快照，不允许在成果页编辑。
+显示Custom override、Original template、Effective run value及差异；curriculum配置规则与实际有效阶段/权重分开，无真实运行遥测时有效值标Not reported，不假造。恢复默认按钮不出现在历史成果只读页。
+用户要调参：Create configuration跳到SANDBOX，在目标Bot下新建Configuration副本。
+如果只有ONNX：可复用引用、运行时设置及已知配方，但不显示Resume training。
+如果有兼容checkpoint：Resume in Arena先检查硬件/task/runtime一致，携带原checkpoint与已保存Configuration version进入ARENA的新Run准备上下文，不显示预算或其他财务信息、不启动GPU，原结果不改变。后续资金审查仅在MASTER > Credits > Review request完成；授权返回后仍由用户在ARENA显式开始，续训参数如需修改必须回到SANDBOX保存新版本。
+如果用户只想用训练配方从零训练：New policy in Sandbox；不要称为“微调ONNX”。
+Versions显示来源Run、日期、参数diff和状态；选版本后媒体/文件/评估同步切换，不交叉串版本。
+
+五、动作模板与 GALLERY 的关系
+
+SANDBOX的Official policy template目录完整包含当前10个ONNX，库存以该文档快照为准。
+GALLERY默认只显示用户实际成果，不因为目录里有10个官方动作就预填10个“已训练成功”卡片。
+如提供Official references范围，必须显示来源revision和来源仓库，开放浏览/下载能力按许可决定，不假装有官方未提供的视频。
+参考playground可能从社区仓库搜索更多策略，本平台首版不自动扩张为全社区市场。
+用户提出“先包含官方所有动作”落实在SANDBOX可选模板，GALLERY展示训练后产物，两者通过Action ID/来源revision关联。
+
+六、关键交互与状态
+
+结果空：No results yet. Start a training run in Arena.
+筛选空：No results match these filters. Clear filters.
+无视频：No recording. View the model or generate a preview.
+权限不足：You do not have access to this result.
+源Bot归档：Source bot archived. This result is still available.
+checkpoint失效：Checkpoint unavailable. Start a new policy from this configuration.
+视频生成中：Recording preview. Your policy files remain available.
+输出部分失败：Policy exported. Preview recording failed.
+版本过旧：This result uses an earlier hardware revision.
+详情离线时保留已缓存元数据，真实模型流离线明确标注，不伪造实时动作。
+
+Share/publish不作为首版默认按钮；将来新增必须显式选择可见性、核对资产许可与隐私，不从Private静默变Public。
+Rename只改展示名称，不改不可变artifact ID与来源文件语义。
+Archive不删源Run或SANDBOX配置；Delete若支持需列出受影响文件、存储/恢复规则并确认。
+
+七、组件与设计交付清单
+
+复用全站：App sidebar、Breadcrumb、Page header、Primary/secondary button、Status badge、Property row、Filter、Dialog、Toast。
+新增/复用SANDBOX：Showcase grid、Media frame、Policy card、Version selector、Source summary、File table。
+Viewer和Media frame可共用容器外壳，但工具栏随Recording/Simulation模式变化，不使用一个混杂全部按钮的控件。
+
+画面规格建议：
+G-01 Desktop showcase：1440×1000首屏，3列，6项不同状态示例（明确Sample data）。
+G-02 Result detail：1440×1000，预览808px，来源328px。
+G-03 Empty/filter-empty/recording-unavailable：沿用主框架的状态变体，不另造风格。
+G-04 Mobile：390px单列卡片，详情媒体自然比例，下载与来源可访问。
+这些是后续画布制作要求，本轮交付为TXT设计规格，不声称这些画面已经绘制。
+
+八、验收清单
+
+1. 默认进入My results橱窗，3/2/1列响应，不用数据库列表作为首屏主体。
+2. 卡片预览、名称、Bot、版本、评估、文件能力明确且不互相挤压。
+3. 字体、色值、字号、按钮与SANDBOX/ARENA一致，无playground黄色或大圆角泄漏。
+4. Preview/Download点击不误跳详情；键盘焦点可见，一次最多播放一个媒体。
+5. 没视频也有可识别海报与文本，不出现纯黑模块。
+6. Viewer/视频源比例与容器按VIEWER-01验收，不裁掉脚、轮或动作终点。
+7. Source run/Source bot指向正确历史版本，Bot更新不篡改旧成果。
+8. Download bundle只包含真实文件，缺失/失败有提示，下载不暗中生成收费资源。
+9. Create configuration回到SANDBOX创建新版本，ONNX-only没有虚假的完整续训入口。
+10. 默认私有，未提供用户请求的公开功能不会自动发布。
+11. 官方库里10个动作不等于用户拥有10项成果；两类来源分开。
+12. 字段缺失不是0，未评估不是失败/成功，未验证真机不是Ready to deploy。
+13. GALLERY全页（含顶栏、弹窗、Toast）没有Credits、余额、预算、费率、账单、金额、付费确认、财务提醒或billing提示；相关展示与操作集中在MASTER > Credits。
+14. Simulation/评估/录制需新授权时，先Review in Master到MASTER > Credits > Review request，返回恢复原上下文，再由用户点击Start simulation / Run evaluation / Generate recording；授权与返回本身不启动任务，取消不扣费且不丢上下文。
+15. 没有新收费的已有录像回放/下载不触发授权；原授权范围内的训练后处理不重复授权或重复提交；新增收费/超出范围必须重新去MASTER审查。
+16. parameters、原始配置及bundle仅交付非财务可复现实验快照，无预算、费率、余额、金额或凭据；财务文件只能在MASTER下载。
+17. Resume in Arena不展示预算、不启动GPU，后续资金审查仅在MASTER；参数调整仍唯一回到SANDBOX，不篡改原成果。
+18. ARENA保留Iterations、Elapsed、Loss、Logs、Checkpoints及只读Rewards，不沿用Metrics(Reward/Length)/los误名；Loss不冒充动作质量，无真实评估始终Not evaluated。
+19. Rewards和curriculum保留保存版本、配置规则与真实遥测的区别，无遥测不显示伪造的Effective run value；GALLERY不提供训练参数编辑或Restore defaults。
+
+九、来源
+
+参考页：https://huggingface.co/spaces/pollen-robotics/microduck-policy-playground
+Space API：https://huggingface.co/api/spaces/pollen-robotics/microduck-policy-playground
+核对布局源码：https://huggingface.co/spaces/pollen-robotics/microduck-policy-playground/raw/11e94f2b8c68c2b73008d16b3d451367770b9cb1/index.html
+官方策略：https://huggingface.co/pollen-robotics/microduck-policies/tree/main
+官方运行时manifest说明：https://github.com/pollen-robotics/microduck/blob/main/docs/policy-manifest.md
+官方训练与安全导出：https://github.com/pollen-robotics/microduck_rl
+其余设计原则和权限约束继承Website Plan v0.2 R2；所有财务披露、授权和财务文件下载以MASTER Design v0.1 R2（Microduck-MASTER-Design-v0.1.txt）的MASTER > Credits为唯一入口；相关五份权威文件统一为2026-09-26 / R2。本轮未实现前端/后端或进行真实策略评估。

@@ -1,0 +1,11 @@
+Model files in this directory come from Mondo-Robotics/open-beni
+(https://github.com/Mondo-Robotics/open-beni), path assets/beni_base.
+
+- mjcf/beni.xml is the upstream MJCF. meshdir and texturedir are set to
+  "meshes" and "textures" so they resolve from the preview scene file.
+  Joints, inertias, and meshes are otherwise unchanged.
+- OBJ meshes and textures are unmodified upstream files.
+- scene_viewer.xml only adds the MuJoCo preview floor, sky, and light.
+- License: MIT. Copyright (c) 2026 Open Beni. SPDX-License-Identifier: MIT.
+
+The assets are used here for the local TrainMyBot model preview.

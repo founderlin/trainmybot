@@ -1,0 +1,232 @@
+MICRODUCK — 网站整体规划 v0.2 / 修订 2026-09-26 / R2
+SANDBOX · ARENA · GALLERY · MASTER
+
+文档状态
+保留用户指定文件名并原位修订；R2 取代同名文件 R1，配套 ARENA、SANDBOX、GALLERY、MASTER 共五份规格。
+本轮只交付信息架构、文字线框、字段、交互与验收要求；不包含网站代码、真实云训练接入或已完成画布。
+说明用中文；网站文案全部英文。正式字体 Avenir Next，布局稿允许 Inter Tight，数字 Regular。
+
+一、已确认方向与 R2 变更
+
+1. 一级导航固定 SANDBOX / ARENA / GALLERY / MASTER。
+2. 运营方统一租赁云端 GPU，终端用户充值 Credits 使用平台服务，不自行连接云厂商。
+3. 拟采用标准 RTX 4070 / RTX 5060，通过官方关联 microduck_rl 的 mjlab / MuJoCo Warp + PPO 路线训练；可用性以实际节点/镜像验证为准。
+4. 保持 Notion 式浅色、轻量属性与列表。SANDBOX、GALLERY 首页采用机器人/成果橱窗，不是商品商城。
+5. SANDBOX / Configuration 是训练参数唯一主编辑入口。一份 Configuration 对应一个动作，一个 Bot 可有多份配置。
+6. 用户最新澄清：原“Metrics”是 Loss，用于观察训练优化趋势；原“los”是 Logs。
+7. ARENA 训练信息仅保留 Iterations、Elapsed、Loss、Logs、Checkpoints；不再单列 Reward / Length 指标。
+8. 另保留 Reward configuration 只读奖励参数；不是新增奖励监控大屏，也不是第二套编辑器。
+9. 保留 MuJoCo Viewer、任务名称/最少来源信息、状态和停止操作；这些属于预览、识别和控制，不扩大训练指标范围。
+10. 所有用户可见财务信息统一到 MASTER > Credits，包括余额、充值、预算、费率、消费、账单、费用确认、财务提醒。
+11. 全局顶栏、SANDBOX、ARENA、GALLERY 不显示上述财务组件；必要跨页入口只写 Review in Master，不带余额/费用角标。
+12. MASTER 内 Credits 设 Overview / Top-up history / Training bills；不再保留平行的 Usage、Billing 二级入口。
+13. Loss 下降或平稳不自动证明动作已学会。强化学习损失可能波动或为负，不标注自动 Converged / Training success；动作效果仍需 Viewer 与 GALLERY 的实际评估。
+
+二、页面职责与主路径
+
+页面       主对象                     主任务                         主操作
+SANDBOX    Bot / Configuration        选择形态、硬件，编辑训练参数     New bot / Save version
+ARENA      Run                        选择配置、算力，执行与监控       New run / Start training / Stop run
+GALLERY    Policy / Version           预览、评估、追溯、下载成果       Open result / Download bundle
+MASTER     Account / Credits          账户、充值、授权与训练账单       Add credits / Review request
+
+训练主路径：
+SANDBOX 橱窗 → New bot → 配色/脚型/电机 → Create bot
+→ Configuration → Official policy template 或 From scratch → Save version
+→ Train in Arena → ARENA 选择已保存配置/算力/输出 → Review in Master
+→ MASTER > Credits > Review request：费率、预算、计费条件与授权
+→ Confirm and return → 返回原 ARENA 草稿 → Start training
+→ Run details → 评估/导出 → Save to Gallery → 预览/下载。
+
+跨页授权规则 AUTH-01（MASTER 文档为详细定义）：
+• Review in Master 不启动 GPU、不扣训练费；Confirm and return 仅确认本次服务范围，不自动运行。
+• 回到原页后用户再点击执行；授权核对、占用额度（若采用）与提交在后端保证防重。
+• 已有效授权的同一草稿不必每次往返；资源/版本/计费相关输出变化或授权失效后必须重新审查。
+• 取消审查保留原页草稿，不创建运行；授权返回后再改配置不能沿用旧授权启动。
+• 非 MASTER 页面只显示行动入口；不足余额、费率变更、额度和结算细节只在 MASTER 解释。
+• 页面简化不取消后台余额校验、安全停止、并发额度约束或消费留痕。
+
+单一来源：
+• SANDBOX 保存配置、模型预览不等于开始训练；没有 policy 时只称 Model preview。
+• 多动作目录不等于一次 Run 同时训练十个动作；训练中不热改 Rewards / PPO / Randomization。
+• ARENA 发现环境数与 GPU 不匹配时返回 Edit in Sandbox，保存新版本后显式 Use this version。
+• 所有训练输入固定版本，不追踪 latest；真实运行引用不可变快照。
+
+三、对象与版本关系
+
+Bot
+• Bot ID、Name、Description、Owner；Appearance revision 与 Hardware revision 分离。
+• Hardware revision 包括脚型、装配、电机/关节映射、质量/惯量、仿真资产。
+• 配色如影响视觉观测、质量或接触参数，不再当成纯外观变化。
+
+Motor profile
+• 厂商规格、标定模型、来源版本分开；未知精确 SKU 不由 family 名称推造。
+• 修改创建新 revision，不覆盖历史 Run；换电机需检查安装、控制接口和动力学，不是只改名称。
+
+Configuration version
+• 绑定 Bot hardware revision、Task、Scene/MJCF、Motor profile revisions。
+• Training、Rewards、Curriculum、Randomization、Playback、Evaluation 与 defaults 来源/overrides。
+• Saved 不等于 Ready to run；不完整训练依赖不得启动。
+
+Run snapshot
+• Configuration version、硬件/软件版本、runtime image、seed、实际解析参数和输出计划。
+• ARENA 运行级选择：Run name、GPU allocation、Maximum runtime、resume checkpoint、受控输出开关。
+• 训练导出包包含复现所需信息，不混入余额、费率、预算、付款资料、账单或供应商凭据。
+
+Service authorization（仅 MASTER 展示）
+• 授权 ID、草稿/请求 ID、资源/版本/输出的固定签名、费率版本、消费上限、有效性与用户确认。
+• 与 Run 建立受控关联；不是模型参数，也不随 parameters.json 分发。
+
+Training bill（仅 MASTER 展示）
+• Bill ID、Run ID、计量条目、适用费率版本、账务状态及更正记录。
+• Run 的完成状态、资源归还、后处理完成与账单结算分别建模，不用一个 Completed 代替。
+
+Policy version
+• Source run、Configuration snapshot、ONNX、参数、评估、视频与可选 checkpoint。
+• 默认私有；二进制或参数变化创建版本。Compatibility checked / Simulation evaluated / Hardware validated 不互相替代。
+
+四、视觉规范与布局计划
+
+主张：机器人外观与动作是视觉中心；训练页只用一条进度行、一组损失曲线和必要列表；财务页以账务行列为主。
+以下是本产品拟定 token，不是 Notion 官方 token：
+Page          #FFFFFF
+Sidebar       #F7F7F5
+Text          #37352F
+Muted text    #73716A
+Divider       #E9E9E7
+Hover         #EFEFED
+
+• Avenir Next 用于文字、数字、图表、表单、日志；布局稿可用 Inter Tight。Webfont 授权实施前确认。
+• Title 32px / Section 18px / Body 14px / Property 13px / Helper ≥12px。
+• 数字 Regular、数值列右对齐；长值支持科学计数法。一级导航大写，其他英文 sentence case。
+• 1440×1000 基准，兼顾1280×800：侧栏216px、顶栏48px、内容左右32px、内容宽1160px。
+• SANDBOX/GALLERY 橱窗：3列376px、间隔16px；按最小卡宽约300px响应为3/2/1列。
+• New bot：720 + 24 + 416；Configuration、ARENA：808 + 24 + 328；窄屏单列。
+• ARENA 右栏只放 Reward configuration，不再放 Compute / Budget / Connection 面板。
+• MASTER：内容宽1160px的紧凑账表，页内标签与属性行，不复制 ARENA 的 Viewer 双栏结构。
+• 输入/按钮圆角4–6px，卡片6px、媒体8px；无渐变、厚投影和毛玻璃；hover浅灰。
+• 持续可见的选中态/焦点态，状态同时有文字；触控目标约44px、桌面控件默认36px。
+
+布局自检：不因参考 OpenRouter 就复制 token 统计大屏；不因强调收敛就把 Reward、Length、KL、Entropy、吞吐和显存重新塞进 ARENA。
+
+五、SANDBOX 页面结构
+
+Bots：标题/说明/New bot → 搜索与筛选 → Bot 橱窗。
+卡片：实际外观 → Bot name → Hardware 电机型号/混合电机 → Software 已配置动作 → 状态。
+Software 只表示已配置，不宣称训练成功。点击进入 Bot，可新建/重命名/复制/归档。
+
+New bot：真实 MuJoCo Viewer + Name / Appearance / Feet / Hardware。
+Standard feet / Roller skates 切换真实模型、碰撞与映射；支持选择电机或 New motor。
+New motor 按锁定 BAM M6 原表15个数值键+model/actuator两标识，与厂商额定规格分开。
+
+Bot / Configuration：配置列表+选中配置编辑区，New configuration 为次级操作。
+Official policy template / From scratch；官方目录完整包含10个 ONNX 动作。
+数值分组 Commands / Rewards / Curriculum / Training / Randomization / Playback / Evaluation。
+Restore defaults 仅当前动作配置，锁定基线、确认+Undo，不改其他动作/硬件/历史任务。
+参数来源不明时标记缺失，不从 ONNX 编造完整原始训练配方。
+本页含顶栏不出现任何财务数值、预算编辑或充值组件；付费云预览按 AUTH-01 转到 MASTER。
+详细内容见 Microduck-SANDBOX-Design-v0.1.txt。
+
+六、ARENA 页面结构
+
+Runs：Run / Bot与Configuration / Status / Iterations / Elapsed，其他来源在详情查看，不显示费用列。
+New training run：Run name → 已保存 Bot/configuration → 模型预览与只读奖励 → Compute / Maximum runtime → Outputs。
+算力只展示可选规格、兼容和可用性；没有费率/余额/预算。正式执行前按 AUTH-01 审查。
+
+Run details：
+页头：Run name、Status、Stop run；来源仅 Bot / Configuration，完整版本信息通过 View source configuration 查看。
+进度行：Iterations / Elapsed，不用 KPI 卡阵列。
+主区：MuJoCo Viewer → Loss / Logs / Checkpoints 三个页内标签，默认 Loss。
+右区：Reward configuration（只读，当前权重/数值参数）；长列表可展开/搜索，不增加贡献图。
+删除：Reward / Length 图表、ETA、吞吐、环境步数、GPU利用率、显存、预算/账务/连接统计面板。
+必要错误以内联提示呈现；不把技术故障隐藏到日志，也不把财务详情写进技术日志。
+Loss 映射真实 runner 输出；没有损失序列显示 Loss unavailable，不用奖励替代、不编造下降曲线。
+Reward configuration 来源是运行快照；课程生效值需真实事件/遥测，未知标 Not reported。
+预览暂停不停止训练；有停止请求不等于后台停止已完成。详细语义见 ARENA R2。
+
+七、GALLERY 页面结构
+
+默认 My results 橱窗，私有；只借鉴 playground 的媒体优先内容顺序，风格仍用全站 token。
+卡片为视频/海报、成果名、Bot/动作/版本、文件能力和评估状态；缺视频不伪造录像。
+详情为媒体/来源 → Files / Evaluation / Configuration / Versions；只下载真实存在文件。
+ONNX-only 不提供 Resume training；兼容完整 checkpoint 才能续训。
+动作效果的真实评估保留在本页，不用 Loss 下降作为成功认证。
+需要额外付费的 Simulation / Run evaluation / Generate recording 先按 AUTH-01 去 MASTER；已有授权范围内后处理不重复确认。
+已有录像播放、静态浏览和文件下载不暗中启动云资源；财务文件仅在 MASTER 获取。
+详细内容见 Microduck-GALLERY-Design-v0.1.txt。
+
+八、MASTER 页面结构
+
+二级仅 Account / Credits。Credits 内：Overview / Top-up history / Training bills。
+参考 OpenRouter 的余额/充值、历史用量筛选、汇总到明细和筛选后导出，不复制其费率/支付/退款规则。
+
+Overview：Available credits、Add credits、独立暂估/已结算消费、财务待处理事项；预算与授权在此进入。
+Top-up history：充值时间、订单号、支付金额与币种、到账 Credits、付款与到账状态、收据入口。
+Training bills：日期/Run/Bot/GPU/账务状态筛选；训练账单列表、用量明细、费率、暂估/已结算、更正、Open run。
+Review request：本次资源/配置/后处理范围、费率版本、预算/停止规则与授权；Confirm and return 后返回原页继续。
+后台预算/余额安全机制不因迁移取消。用户扣费不得超过已确认请求上限；无法守住该边界的资源组合禁止付费执行。自动充值默认不启用，如支持需独立用户授权与上限。
+充值支付成功不等于 Credits 已到账；训练完成不等于账单已结算；充值收据不等于训练账单/税务发票。
+供应商账单属于平台成本，普通用户看不到云厂商凭据和成本。
+详细内容见新增 Microduck-MASTER-Design-v0.1.txt。
+
+九、VIEWER-01：跨页面媒体契约
+
+1. Live Viewer 的 drawing buffer、viewport、相机 aspect 跟随模块真实宽高，不是固定640×360流外套任意大框。
+2. 不出现信箱/柱状黑条，不拉伸，不裁掉头/脚/轮及动作道具；不以 object-fit: cover 掩盖比例问题。
+3. 远程流需服务端按目标比例渲染；不能动态协商时按源比例调整容器高度，明确这是降级。
+4. 固定录像按源比例调整媒体高度，不把录像说成 Live；切脚型/全屏/折叠侧栏后重新取景。
+5. 加载/断流/旧帧/换型失败均有状态；无 policy 只称 Model preview，外力助稳标 Stabilization assist。
+6. Pause preview 只暂停预览。完整规格和验收矩阵保留在 ARENA 第七节；本轮未实施实测。
+
+十、技术与证据边界
+
+• microduck-lab 参考 Teach 和训练交互；本地 CPU MuJoCo + SB3 不能充当本平台 CUDA 验证。
+• microduck 参考运行时和 manifest；microduck_rl 参考任务、MJCF、训练与官方 ONNX 导出。
+• 官方 HF policies 已核对10个 ONNX；无完整原始训练配方/训练 checkpoint/视频，不虚构拥有这些文件。
+• BAM 依赖固定训练 uv.lock revision，仿真电压不可用作实体供电建议，模型电流限制和任务 override 分层解释。
+• 标准 RTX 4070/5060 按实际驱动、Torch、Warp、显存验证；不承诺4096环境或固定时长。
+• 上游代码 Apache 2.0 不覆盖3D资产的 CC BY-SA-NC 限制；收费使用模型前须确认商业授权。
+• 历史 playground 参考为源码结构核对；本轮 OpenRouter 参考为公开官方文档核对，未访问用户账户或做像素级复刻。
+
+十一、验收与未决事项
+
+验收：
+1. 五份文档同为2026-09-26/R2，训练页名称固定 Loss / Logs，未将 Reward/Length 重加为指标。
+2. ARENA 仅五类训练信息+只读奖励；Viewer与必要控制保留，没有新监控大屏。
+3. Loss 使用真实序列与定义，不造综合损失、不自动宣称收敛；缺值、NaN/Inf与断线有状态。
+4. 奖励来源、权重/参数、课程已上报有效值可查，修改只在 SANDBOX 生效为新版本。
+5. 全局顶栏和其他三页没有财务组件/数值，相关技术日志和成果包不泄漏账务。
+6. MASTER 充值历史和训练账单分开，授权取消不启动、返回不自动运行、同一操作不重复扣费。
+7. 从配置到 Run 到成果链连续；动作/电机完整清单、默认恢复和 VIEWER-01 不回退。
+8. 训练终止、资源返回、后处理、账务状态独立；财务状态只在 MASTER 呈现。
+
+实施前待确定：
+• 官方 policy 对应训练 recipe 的精确映射、镜像/适配器与十动作实载验证。
+• 真实 runner Loss 键、计算定义/聚合粒度、步数语义与课程遥测字段。
+• 租赁供应商、费率/计费粒度/起止、停止余量、初始化/排队/后处理收费、异常补偿。
+• Credits 换算、支付币种和渠道、税费/退款、到账与账单保留期、自动充值能力。
+• 电机精确SKU及校准、模型商业授权、字体Web授权。
+这些是上线条件，不在规划稿中用假数值或“已验证”替代。
+
+十二、权威文件与参考
+
+Microduck-Website-Plan-v0.2.txt          总规划，原位修订 R2
+Microduck-ARENA-Structure-v0.3.txt       ARENA 极简结构与 Viewer，原位修订 R2
+Microduck-SANDBOX-Design-v0.1.txt        SANDBOX 配置及完整来源，原位修订 R2
+Microduck-GALLERY-Design-v0.1.txt        成果橱窗与授权联动，原位修订 R2
+Microduck-MASTER-Design-v0.1.txt         MASTER 账户、Credits、充值历史和训练账单，新增 R2
+
+目录内 SANDBOX-Structure-v0.1、GALLERY-Structure-v0.1 为早期平行草稿，不是本轮实施基线，不收入 R2 包。
+旧 R1 包保留历史用途；当前以 Microduck-Design-Specs-R2.zip 中五份文档为准。
+
+https://github.com/jonathanhawkins/microduck-lab
+https://github.com/pollen-robotics/microduck
+https://github.com/pollen-robotics/microduck_rl
+https://huggingface.co/pollen-robotics/microduck-policies/tree/main
+https://huggingface.co/spaces/pollen-robotics/microduck-policy-playground
+https://github.com/Rhoban/bam
+https://www.openrouter.ai/docs/faq
+https://www.openrouter.ai/docs/guides/features/activity
+https://openrouter.ai/settings/credits
+
+R2 核对日期：2026-09-26。机器人/电机固定 revision 延续 SANDBOX 来源快照，本轮没有重新运行训练验证。
